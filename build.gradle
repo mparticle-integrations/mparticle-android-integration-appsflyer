@@ -1,12 +1,18 @@
-ext {
-    kitDescription = 'AppsFlyer Kit for the mParticle SDK'
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.mparticle:android-kit-plugin:+'
+    }
 }
 
-apply from: '../../scripts/kit-common.gradle'
-apply from: '../../scripts/maven.gradle'
+apply plugin: 'com.mparticle.kit'
 
 dependencies {
     //Appsflyer has a library in Maven Central that
     //would be better to use in the future.
     //compile 'com.appsflyer:AppsflyerLib:4.3.3'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
