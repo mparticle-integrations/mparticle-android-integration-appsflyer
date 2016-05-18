@@ -11,8 +11,5 @@ buildscript {
 apply plugin: 'com.mparticle.kit'
 
 dependencies {
-    //Appsflyer has a library in Maven Central that
-    //would be better to use in the future.
-    //compile 'com.appsflyer:AppsflyerLib:4.3.3'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.appsflyer:af-android-sdk:4.3.7'
 }
