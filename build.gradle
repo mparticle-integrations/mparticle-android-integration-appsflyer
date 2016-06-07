@@ -11,5 +11,5 @@ buildscript {
 apply plugin: 'com.mparticle.kit'
 
 dependencies {
-    compile 'com.appsflyer:af-android-sdk:4.3.7'
+    compile 'com.appsflyer:af-android-sdk:4.3.8'
 }

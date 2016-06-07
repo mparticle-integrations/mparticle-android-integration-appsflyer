@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.appsflyer.AFInAppEventParameterName;
@@ -24,7 +26,6 @@ import com.mparticle.internal.ConfigManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * Embedded version of the AppsFlyer SDK v 4.3.0
  */
-public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener {
+public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
 
     private static final String DEV_KEY = "devKey";
 
@@ -53,6 +54,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     protected List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
         AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), getSettings().get(DEV_KEY));
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
+        AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdDisabled() == false);
         return null;
     }
 
@@ -184,6 +186,21 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     }
 
     @Override
+    public void setUserAttributeList(String s, List<String> list) {
+
+    }
+
+    @Override
+    public boolean supportsAttributeLists() {
+        return true;
+    }
+
+    @Override
+    public void setAllUserAttributes(Map<String, String> map, Map<String, List<String>> map1) {
+
+    }
+
+    @Override
     public void removeUserAttribute(String key) {
 
     }
@@ -251,5 +268,46 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public void setInstallReferrer(Intent intent) {
         AppsFlyerLib.getInstance().onReceive(getContext(), intent);
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle bundle) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStarted(Activity activity) {
+        AppsFlyerLib.getInstance().trackAppLaunch(getContext());
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityResumed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityPaused(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStopped(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        AppsFlyerLib.getInstance().trackLocation(getContext(), location.getLatitude(), location.getLongitude());
     }
 }
