@@ -151,7 +151,11 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public List<ReportingMessage> logEvent(MPEvent event) {
-        AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), new HashMap<String, Object>(event.getInfo()));
+        HashMap<String, Object> hashMap = null;
+        if (event.getInfo() != null && event.getInfo().size() > 0) {
+            hashMap = new HashMap<String, Object>(event.getInfo());
+        }
+        AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), hashMap);
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         messages.add(ReportingMessage.fromEvent(this, event));
         return messages;
