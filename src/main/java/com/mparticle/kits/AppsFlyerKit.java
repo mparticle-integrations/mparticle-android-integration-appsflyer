@@ -34,7 +34,7 @@ import java.util.Map;
 
 
 /**
- * Embedded version of the AppsFlyer SDK v 4.3.0
+ * mParticle Kit wrapper for the AppsFlyer SDK
  */
 public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
 
@@ -281,7 +281,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public List<ReportingMessage> onActivityStarted(Activity activity) {
-        AppsFlyerLib.getInstance().trackAppLaunch(getContext());
+        AppsFlyerLib.getInstance().trackAppLaunch(getContext(), getSettings().get(DEV_KEY));
         return null;
     }
 

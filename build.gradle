@@ -17,5 +17,5 @@ android {
 }
 
 dependencies {
-    compile 'com.appsflyer:af-android-sdk:4.3.8'
+    compile 'com.appsflyer:af-android-sdk:4.5.0'
 }
