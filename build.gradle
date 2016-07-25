@@ -10,6 +10,12 @@ buildscript {
 
 apply plugin: 'com.mparticle.kit'
 
+android {
+    defaultConfig {
+        minSdkVersion 14
+    }
+}
+
 dependencies {
     compile 'com.appsflyer:af-android-sdk:4.3.8'
 }
