@@ -20,7 +20,6 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
-import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONException;
@@ -93,7 +92,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 || event.getProductAction().equals(Product.PURCHASE)) {
             Map<String, Object> eventValues = new HashMap<String, Object>();
 
-            if (!TextUtils.isEmpty(event.getCurrency())) {
+            if (!KitUtils.isEmpty(event.getCurrency())) {
                 eventValues.put(AFInAppEventParameterName.CURRENCY, event.getCurrency());
             }
             if (event.getProductAction().equals(Product.ADD_TO_CART)
@@ -106,10 +105,10 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                         productEventValues.putAll(eventValues);
                         productEventValues.put(AFInAppEventParameterName.PRICE, product.getUnitPrice());
                         productEventValues.put(AFInAppEventParameterName.QUANTITY, product.getQuantity());
-                        if (!TextUtils.isEmpty(product.getSku())) {
+                        if (!KitUtils.isEmpty(product.getSku())) {
                             productEventValues.put(AFInAppEventParameterName.CONTENT_ID, product.getSku());
                         }
-                        if (!TextUtils.isEmpty(product.getCategory())) {
+                        if (!KitUtils.isEmpty(product.getCategory())) {
                             productEventValues.put(AFInAppEventParameterName.CONTENT_TYPE, product.getCategory());
                         }
                         AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, productEventValues);
@@ -133,7 +132,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 messages.add(ReportingMessage.fromEvent(this, event));
             }
         } else {
-            List<MPEvent> eventList = CommerceEventUtil.expand(event);
+            List<MPEvent> eventList = CommerceEventUtils.expand(event);
             if (eventList != null) {
                 for (int i = 0; i < eventList.size(); i++) {
                     try {
@@ -251,7 +250,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public void onInstallConversionFailure(String s) {
-        if (!TextUtils.isEmpty(s)) {
+        if (!KitUtils.isEmpty(s)) {
             DeepLinkError error = new DeepLinkError()
                     .setMessage(s)
                     .setServiceProviderId(getConfiguration().getKitId());
