@@ -38,6 +38,7 @@ import java.util.Map;
 public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
 
     private static final String DEV_KEY = "devKey";
+    private static final String APPSFLYERID_INTEGRATION_KEY = "appsflyer_id_integration_setting";
 
     @Override
     public Object getInstance() {
@@ -54,8 +55,12 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), getSettings().get(DEV_KEY));
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdDisabled() == false);
+        HashMap<String, String> integrationAttributes = new HashMap<String, String>(1);
+        integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
+        setIntegrationAttributes(integrationAttributes);
         return null;
     }
+
 
     @Override
     public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
