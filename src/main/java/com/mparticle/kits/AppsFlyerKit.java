@@ -13,6 +13,7 @@ import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties;
+import com.appsflyer.SingleInstallBroadcastReceiver;
 import com.mparticle.DeepLinkError;
 import com.mparticle.DeepLinkListener;
 import com.mparticle.DeepLinkResult;
@@ -275,7 +276,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public void setInstallReferrer(Intent intent) {
-        AppsFlyerLib.getInstance().onReceive(getContext(), intent);
+        new SingleInstallBroadcastReceiver().onReceive(getContext(), intent);
     }
 
     @Override
