@@ -22,6 +22,7 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -145,7 +146,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                         logEvent(eventList.get(i));
                         messages.add(ReportingMessage.fromEvent(this, event));
                     } catch (Exception e) {
-                        ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logCustomEvent to AppsFlyer kit: " + e.toString());
+                        Logger.warning("Failed to call logCustomEvent to AppsFlyer kit: " + e.toString());
                     }
                 }
             }
