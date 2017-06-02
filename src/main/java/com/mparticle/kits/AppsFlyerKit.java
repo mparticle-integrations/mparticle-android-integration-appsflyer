@@ -1,12 +1,9 @@
 package com.mparticle.kits;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
-import android.text.TextUtils;
 
 import com.appsflyer.AFInAppEventParameterName;
 import com.appsflyer.AFInAppEventType;
@@ -21,13 +18,13 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +34,7 @@ import java.util.Map;
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
  */
-public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
+public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener {
 
     private static final String DEV_KEY = "devKey";
     private static final String APPSFLYERID_INTEGRATION_KEY = "appsflyer_id_integration_setting";
@@ -60,7 +57,9 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         HashMap<String, String> integrationAttributes = new HashMap<String, String>(1);
         integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
         setIntegrationAttributes(integrationAttributes);
-        return null;
+        List<ReportingMessage> messages = new ArrayList<ReportingMessage>();
+        messages.add(new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null));
+        return messages;
     }
 
 
@@ -278,42 +277,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public void setInstallReferrer(Intent intent) {
         new SingleInstallBroadcastReceiver().onReceive(getContext(), intent);
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle bundle) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity) {
-        AppsFlyerLib.getInstance().trackAppLaunch(getContext(), getSettings().get(DEV_KEY));
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle bundle) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
-        return null;
     }
 
     @Override
