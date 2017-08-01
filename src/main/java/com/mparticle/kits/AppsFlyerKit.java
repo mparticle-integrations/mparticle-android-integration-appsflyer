@@ -18,7 +18,9 @@ import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
+import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -130,9 +132,17 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                     }
                     eventValues.put(AFInAppEventParameterName.QUANTITY, totalQuantity);
                 }
-                if (event.getTransactionAttributes() != null && event.getTransactionAttributes().getRevenue() != 0) {
-                    String paramName = event.getProductAction().equals(Product.PURCHASE) ? AFInAppEventParameterName.REVENUE : AFInAppEventParameterName.PRICE;
-                    eventValues.put(paramName, event.getTransactionAttributes().getRevenue());
+                TransactionAttributes transactionAttributes = event.getTransactionAttributes();
+                if (transactionAttributes != null && transactionAttributes.getRevenue() != 0) {
+                    Double revenue = transactionAttributes.getRevenue();
+                    if (event.getProductAction().equals(Product.PURCHASE)) {
+                        eventValues.put(AFInAppEventParameterName.REVENUE, revenue);
+                        if (!MPUtility.isEmpty(transactionAttributes.getId())) {
+                            eventValues.put(AFInAppEventType.ORDER_ID, transactionAttributes.getId());
+                        }
+                    } else {
+                        eventValues.put(AFInAppEventParameterName.PRICE, revenue);
+                    }
                 }
                 AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, eventValues);
                 messages.add(ReportingMessage.fromEvent(this, event));
