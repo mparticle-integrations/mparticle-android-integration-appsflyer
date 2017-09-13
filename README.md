@@ -16,7 +16,7 @@ This repository contains the [AppsFlyer](https://www.appsflyer.com/) integration
 
 ### Documentation
 
-[AppsFlyer integration](http://docs.mparticle.com/?java#appsflyer)
+[AppsFlyer integration](http://docs.mparticle.com/integrations/appsflyer/event/)
 
 ### License
 
