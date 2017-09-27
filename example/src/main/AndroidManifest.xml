@@ -18,6 +18,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data     android:scheme="mparticle" />
+                <!-- REPLACE with your onelink host-->
+                <data android:scheme="https"
+                    android:host="mparticle.onelink.me"/>
             </intent-filter>
         </activity>
         <!-- Add the mParticle SDK's ReferrerReceiver to your manifest. -->

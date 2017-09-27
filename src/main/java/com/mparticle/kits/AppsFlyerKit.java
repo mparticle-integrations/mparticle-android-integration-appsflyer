@@ -1,9 +1,11 @@
 package com.mparticle.kits;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 
 import com.appsflyer.AFInAppEventParameterName;
 import com.appsflyer.AFInAppEventType;
@@ -36,10 +38,21 @@ import java.util.Map;
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
  */
-public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener {
+public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
 
     private static final String DEV_KEY = "devKey";
     private static final String APPSFLYERID_INTEGRATION_KEY = "appsflyer_id_integration_setting";
+
+    /**
+     * This key will be present when returning a result from AppsFlyer's onInstallConversionDataLoaded API
+     */
+    public static final String INSTALL_CONVERSION_RESULT = "MPARTICLE_APPSFLYER_INSTALL_CONVERSION_RESULT";
+
+    /**
+     * This key will be present when returning a result from AppsFlyer's onAppOpenAttribution API
+     */
+    public static final String APP_OPEN_ATTRIBUTION_RESULT = "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT";
+    private DeepLinkResult mLatestConversionData, mLatestOpenData;
 
     @Override
     public Object getInstance() {
@@ -53,8 +66,9 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     protected List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
-        AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), getSettings().get(DEV_KEY));
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
+        AppsFlyerLib.getInstance().init(getSettings().get(DEV_KEY), this);
+        AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext());
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdDisabled() == false);
         HashMap<String, String> integrationAttributes = new HashMap<String, String>(1);
         integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
@@ -77,11 +91,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public List<ReportingMessage> logException(Exception exception, Map<String, String> eventData, String message) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
         return null;
     }
 
@@ -184,7 +193,12 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public void checkForDeepLink() {
-        AppsFlyerLib.getInstance().registerConversionListener(getContext(), this);
+        if (mLatestOpenData != null) {
+            ((DeepLinkListener) getKitManager()).onResult(mLatestOpenData);
+        }
+        if (mLatestConversionData != null) {
+            ((DeepLinkListener) getKitManager()).onResult(mLatestConversionData);
+        }
     }
 
     @Override
@@ -248,40 +262,65 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     }
 
     @Override
-    public void onInstallConversionDataLoaded(Map<String, String> map) {
-        if (map != null) {
-            JSONObject jsonResult = new JSONObject();
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                try {
-                    jsonResult.put(entry.getKey(), entry.getValue());
-                } catch (JSONException e) {
-                }
-            }
-            DeepLinkResult result = new DeepLinkResult()
-                    .setParameters(jsonResult)
-                    .setServiceProviderId(getConfiguration().getKitId());
-            ((DeepLinkListener)getKitManager()).onResult(result);
+    public void onInstallConversionDataLoaded(Map<String, String> conversionData) {
+        if (conversionData == null) {
+            conversionData = new HashMap<String, String>();
         }
+        conversionData.put(INSTALL_CONVERSION_RESULT, "true");
+        JSONObject jsonResult = new JSONObject();
+        for (Map.Entry<String, String> entry : conversionData.entrySet()) {
+            try {
+                jsonResult.put(entry.getKey(), entry.getValue());
+            } catch (JSONException e) {
+            }
+        }
+
+        DeepLinkResult result = new DeepLinkResult()
+                .setParameters(jsonResult)
+                .setServiceProviderId(getConfiguration().getKitId());
+        mLatestConversionData = result;
+        ((DeepLinkListener)getKitManager()).onResult(result);
+
     }
 
     @Override
-    public void onInstallConversionFailure(String s) {
-        if (!KitUtils.isEmpty(s)) {
+    public void onInstallConversionFailure(String conversionFailure) {
+        if (!KitUtils.isEmpty(conversionFailure)) {
             DeepLinkError error = new DeepLinkError()
-                    .setMessage(s)
+                    .setMessage(conversionFailure)
                     .setServiceProviderId(getConfiguration().getKitId());
             ((DeepLinkListener)getKitManager()).onError(error);
         }
     }
 
     @Override
-    public void onAppOpenAttribution(Map<String, String> map) {
-        onInstallConversionDataLoaded(map);
+    public void onAppOpenAttribution(Map<String, String> attributionData) {
+        if (attributionData == null) {
+            attributionData = new HashMap<String, String>();
+        }
+        attributionData.put(APP_OPEN_ATTRIBUTION_RESULT, "true");
+        JSONObject jsonResult = new JSONObject();
+        for (Map.Entry<String, String> entry : attributionData.entrySet()) {
+            try {
+                jsonResult.put(entry.getKey(), entry.getValue());
+            } catch (JSONException e) {
+            }
+        }
+        DeepLinkResult result = new DeepLinkResult()
+                .setParameters(jsonResult)
+                .setServiceProviderId(getConfiguration().getKitId());
+        mLatestOpenData = result;
+        ((DeepLinkListener)getKitManager()).onResult(result);
     }
 
     @Override
-    public void onAttributionFailure(String s) {
-        onInstallConversionFailure(s);
+    public void onAttributionFailure(String attributionFailure) {
+        if (!KitUtils.isEmpty(attributionFailure)) {
+            DeepLinkError error = new DeepLinkError()
+                    .setMessage(attributionFailure)
+                    .setServiceProviderId(getConfiguration().getKitId());
+            ((DeepLinkListener)getKitManager()).onError(error);
+        }
     }
 
     @Override
@@ -292,5 +331,41 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public void setLocation(Location location) {
         AppsFlyerLib.getInstance().trackLocation(getContext(), location.getLatitude(), location.getLongitude());
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle bundle) {
+        AppsFlyerLib.getInstance().sendDeepLinkData(activity);
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStarted(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityResumed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityPaused(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStopped(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
+        return null;
     }
 }
