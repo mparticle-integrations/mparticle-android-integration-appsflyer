@@ -13,9 +13,8 @@ import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties;
 import com.appsflyer.SingleInstallBroadcastReceiver;
-import com.mparticle.DeepLinkError;
-import com.mparticle.DeepLinkListener;
-import com.mparticle.DeepLinkResult;
+import com.mparticle.AttributionError;
+import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -52,7 +51,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
      * This key will be present when returning a result from AppsFlyer's onAppOpenAttribution API
      */
     public static final String APP_OPEN_ATTRIBUTION_RESULT = "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT";
-    private DeepLinkResult mLatestConversionData, mLatestOpenData;
+    private AttributionResult mLatestConversionData, mLatestOpenData;
 
     @Override
     public Object getInstance() {
@@ -190,17 +189,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         return null;
     }
 
-
-    @Override
-    public void checkForDeepLink() {
-        if (mLatestOpenData != null) {
-            ((DeepLinkListener) getKitManager()).onResult(mLatestOpenData);
-        }
-        if (mLatestConversionData != null) {
-            ((DeepLinkListener) getKitManager()).onResult(mLatestConversionData);
-        }
-    }
-
     @Override
     public List<ReportingMessage> setOptOut(boolean optOutStatus) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(optOutStatus);
@@ -275,21 +263,21 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
             }
         }
 
-        DeepLinkResult result = new DeepLinkResult()
+        AttributionResult result = new AttributionResult()
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
         mLatestConversionData = result;
-        ((DeepLinkListener)getKitManager()).onResult(result);
+        getKitManager().onResult(result);
 
     }
 
     @Override
     public void onInstallConversionFailure(String conversionFailure) {
         if (!KitUtils.isEmpty(conversionFailure)) {
-            DeepLinkError error = new DeepLinkError()
+            AttributionError error = new AttributionError()
                     .setMessage(conversionFailure)
                     .setServiceProviderId(getConfiguration().getKitId());
-            ((DeepLinkListener)getKitManager()).onError(error);
+            getKitManager().onError(error);
         }
     }
 
@@ -306,20 +294,20 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
             } catch (JSONException e) {
             }
         }
-        DeepLinkResult result = new DeepLinkResult()
+        AttributionResult result = new AttributionResult()
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
         mLatestOpenData = result;
-        ((DeepLinkListener)getKitManager()).onResult(result);
+        getKitManager().onResult(result);
     }
 
     @Override
     public void onAttributionFailure(String attributionFailure) {
         if (!KitUtils.isEmpty(attributionFailure)) {
-            DeepLinkError error = new DeepLinkError()
+            AttributionError error = new AttributionError()
                     .setMessage(attributionFailure)
                     .setServiceProviderId(getConfiguration().getKitId());
-            ((DeepLinkListener)getKitManager()).onError(error);
+            (getKitManager()).onError(error);
         }
     }
 
