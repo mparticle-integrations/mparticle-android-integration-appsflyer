@@ -1,13 +1,6 @@
 <manifest package="com.mparticle.kits.appsflyer"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <!-- This permission is required per AppsFlyer's docs -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <application>
-        <meta-data
-            android:name="com.urbanairship.autopilot"
-            android:value="com.mparticle.kits.MParticleAutopilot"/>
-
-    </application>
+    <application/>
 </manifest>
