@@ -51,7 +51,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
      * This key will be present when returning a result from AppsFlyer's onAppOpenAttribution API
      */
     public static final String APP_OPEN_ATTRIBUTION_RESULT = "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT";
-    private AttributionResult mLatestConversionData, mLatestOpenData;
 
     @Override
     public Object getInstance() {
@@ -133,6 +132,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 }
             } else {
                 String eventName = event.getProductAction().equals(Product.CHECKOUT) ? AFInAppEventType.INITIATED_CHECKOUT : AFInAppEventType.PURCHASE;
+                eventValues.put(AFInAppEventParameterName.CONTENT_ID, AppsFlyerKit.generateProductIdList(event));
                 if (event.getProducts() != null && event.getProducts().size() > 0) {
                     double totalQuantity = 0;
                     for (Product product : event.getProducts()) {
@@ -170,6 +170,25 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         }
 
         return messages;
+    }
+
+    static String generateProductIdList(CommerceEvent event) {
+        if (event == null || event.getProducts() == null || event.getProducts().size() == 0) {
+            return null;
+        }
+        StringBuilder productIdList = new StringBuilder();
+        for (Product product : event.getProducts()) {
+            String sku = product.getSku();
+            if (!KitUtils.isEmpty(sku)) {
+                productIdList.append(sku.replace(",","%2C"));
+                productIdList.append(",");
+            }
+        }
+        if (productIdList.length() > 0) {
+            return productIdList
+                    .substring(0, productIdList.length() - 1);
+        }
+        return null;
     }
 
     @Override
@@ -266,7 +285,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AttributionResult result = new AttributionResult()
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
-        mLatestConversionData = result;
         getKitManager().onResult(result);
 
     }
@@ -297,7 +315,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AttributionResult result = new AttributionResult()
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
-        mLatestOpenData = result;
         getKitManager().onResult(result);
     }
 
