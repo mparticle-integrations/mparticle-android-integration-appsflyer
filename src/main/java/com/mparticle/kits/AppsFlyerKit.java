@@ -269,13 +269,13 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     }
 
     @Override
-    public void onInstallConversionDataLoaded(Map<String, String> conversionData) {
+    public void onConversionDataSuccess(Map<String, Object> conversionData) {
         if (conversionData == null) {
-            conversionData = new HashMap<String, String>();
+            conversionData = new HashMap<String, Object>();
         }
         conversionData.put(INSTALL_CONVERSION_RESULT, "true");
         JSONObject jsonResult = new JSONObject();
-        for (Map.Entry<String, String> entry : conversionData.entrySet()) {
+        for (Map.Entry<String, Object> entry : conversionData.entrySet()) {
             try {
                 jsonResult.put(entry.getKey(), entry.getValue());
             } catch (JSONException e) {
@@ -286,11 +286,10 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
         getKitManager().onResult(result);
-
     }
 
     @Override
-    public void onInstallConversionFailure(String conversionFailure) {
+    public void onConversionDataFail(String conversionFailure) {
         if (!KitUtils.isEmpty(conversionFailure)) {
             AttributionError error = new AttributionError()
                     .setMessage(conversionFailure)
