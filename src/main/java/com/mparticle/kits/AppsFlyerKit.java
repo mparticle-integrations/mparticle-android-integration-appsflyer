@@ -107,6 +107,9 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 || event.getProductAction().equals(Product.PURCHASE)) {
             Map<String, Object> eventValues = new HashMap<String, Object>();
 
+            if (event.getCustomAttributes() != null) {
+                eventValues.putAll(event.getCustomAttributes());
+            }
             if (!KitUtils.isEmpty(event.getCurrency())) {
                 eventValues.put(AFInAppEventParameterName.CURRENCY, event.getCurrency());
             }
@@ -194,8 +197,8 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public List<ReportingMessage> logEvent(MPEvent event) {
         HashMap<String, Object> hashMap = null;
-        if (event.getInfo() != null && event.getInfo().size() > 0) {
-            hashMap = new HashMap<String, Object>(event.getInfo());
+        if (event.getCustomAttributes() != null && event.getCustomAttributes().size() > 0) {
+            hashMap = new HashMap<String, Object>(event.getCustomAttributes());
         }
         AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), hashMap);
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
