@@ -8,7 +8,7 @@ This repository contains the [AppsFlyer](https://www.appsflyer.com/) integration
 
     ```groovy
     dependencies {
-        compile 'com.mparticle:android-appsflyer-kit:5+'
+        implementation 'com.mparticle:android-appsflyer-kit:5+'
     }
     ```
 2. Follow the mParticle Android SDK [quick-start](https://github.com/mParticle/mparticle-android-sdk), then rebuild and launch your app, and verify that you see `"AppsFlyer detected"` in the output of `adb logcat`.
