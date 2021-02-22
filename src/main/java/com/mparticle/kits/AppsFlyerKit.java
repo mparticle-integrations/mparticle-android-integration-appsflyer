@@ -1,7 +1,6 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -32,7 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
@@ -65,8 +63,8 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     protected List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
-        AppsFlyerLib.getInstance().init(getSettings().get(DEV_KEY), this);
-        AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext());
+        AppsFlyerLib.getInstance().init(getSettings().get(DEV_KEY), this, context);
+        AppsFlyerLib.getInstance().start(context.getApplicationContext());
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdDisabled() == false);
         HashMap<String, String> integrationAttributes = new HashMap<String, String>(1);
         integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
@@ -129,7 +127,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                         if (!KitUtils.isEmpty(product.getCategory())) {
                             productEventValues.put(AFInAppEventParameterName.CONTENT_TYPE, product.getCategory());
                         }
-                        AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, productEventValues);
+                        AppsFlyerLib.getInstance().logEvent(getContext(), eventName, productEventValues);
                         messages.add(ReportingMessage.fromEvent(this, event));
                     }
                 }
@@ -155,7 +153,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                         eventValues.put(AFInAppEventParameterName.PRICE, revenue);
                     }
                 }
-                AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, eventValues);
+                AppsFlyerLib.getInstance().logEvent(getContext(), eventName, eventValues);
                 messages.add(ReportingMessage.fromEvent(this, event));
             }
         } else {
@@ -200,7 +198,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         if (event.getCustomAttributes() != null && event.getCustomAttributes().size() > 0) {
             hashMap = new HashMap<String, Object>(event.getCustomAttributes());
         }
-        AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), hashMap);
+        AppsFlyerLib.getInstance().logEvent(getContext(), event.getEventName(), hashMap);
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         messages.add(ReportingMessage.fromEvent(this, event));
         return messages;
@@ -213,7 +211,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public List<ReportingMessage> setOptOut(boolean optOutStatus) {
-        AppsFlyerLib.getInstance().setDeviceTrackingDisabled(optOutStatus);
+        AppsFlyerLib.getInstance().anonymizeUser(optOutStatus);
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
                 new ReportingMessage(this, ReportingMessage.MessageType.OPT_OUT, System.currentTimeMillis(), null)
@@ -337,12 +335,12 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public void setLocation(Location location) {
-        AppsFlyerLib.getInstance().trackLocation(getContext(), location.getLatitude(), location.getLongitude());
+        AppsFlyerLib.getInstance().logLocation(getContext(), location.getLatitude(), location.getLongitude());
     }
 
     @Override
     public List<ReportingMessage> onActivityCreated(Activity activity, Bundle bundle) {
-        AppsFlyerLib.getInstance().sendDeepLinkData(activity);
+        AppsFlyerLib.getInstance().start(activity);
         return null;
     }
 
