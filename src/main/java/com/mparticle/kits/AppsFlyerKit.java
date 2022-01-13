@@ -65,7 +65,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
         AppsFlyerLib.getInstance().init(getSettings().get(DEV_KEY), this, context);
         AppsFlyerLib.getInstance().start(context.getApplicationContext());
-        AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdDisabled() == false);
+        AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdEnabled() == true);
         HashMap<String, String> integrationAttributes = new HashMap<String, String>(1);
         integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
         setIntegrationAttributes(integrationAttributes);
