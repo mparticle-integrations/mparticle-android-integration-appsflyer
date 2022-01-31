@@ -38,13 +38,13 @@ public class AppsflyerKitTests {
      */
     @Test
     public void testOnKitCreate() throws Exception{
-        Exception e = null;
+        Throwable e = null;
         try {
             KitIntegration kit = getKit();
             Map settings = new HashMap<>();
             settings.put("fake setting", "fake");
             kit.onKitCreate(settings, Mockito.mock(Context.class));
-        }catch (Exception ex) {
+        }catch (Throwable ex) {
             e = ex;
         }
         assertNotNull(e);
