@@ -330,7 +330,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
 
     @Override
     public void setInstallReferrer(Intent intent) {
-        new SingleInstallBroadcastReceiver().onReceive(getContext(), intent);
+        //do nothing, Appsflyer will fetch the install referrer data internally, as long as the proper Play Install Referrer dependency is present
     }
 
     @Override
