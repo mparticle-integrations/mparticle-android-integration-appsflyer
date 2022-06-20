@@ -23,5 +23,5 @@ android {
 }
 
 dependencies {
-    api 'com.appsflyer:af-android-sdk:6.6.1'
+    api 'com.appsflyer:af-android-sdk:6.7.0'
 }
