@@ -30,7 +30,7 @@ dependencies {
     api 'com.appsflyer:af-android-sdk:6.7.0'
     implementation "androidx.core:core-ktx:1.8.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    testImplementation "org.mockito:mockito-core:3.12.4"
+    testImplementation "org.mockito:mockito-core:4.6.1"
     testImplementation("io.mockk:mockk:1.12.4")
 
 
