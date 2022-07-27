@@ -135,7 +135,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
                 if (event.productAction == Product.ADD_TO_CART) ADD_TO_CART
                 else ADD_TO_WISH_LIST
 
-            productList?.forEach { product ->
+            productList?.iterator()?.forEach { product ->
                 val productEventValues: MutableMap<String, Any?> = hashMapOf()
                 productEventValues.putAll(eventValues)
                 with(product) {
