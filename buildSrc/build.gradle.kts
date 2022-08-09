@@ -15,32 +15,15 @@ gradlePlugin {
     }
 }
 
-buildscript {
-    repositories {
-        google()
-        mavenLocal()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-    }
-}
-
 repositories {
     google()
     mavenLocal()
     mavenCentral()
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    languageVersion = "1.5.1"
-}
-
 dependencies {
     implementation("com.android.tools.build:gradle:7.2.2")
-    implementation("com.android.tools.build:gradle-api:7.2.2")
+//    implementation("com.android.tools.build:gradle-api:7.2.2")
 //    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0")
 //    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31")
 }

@@ -10,8 +10,8 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:7.2.2")
-        classpath("com.mparticle:android-kit-plugin:5.44.0")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
+        classpath("com.mparticle:android-kit-plugin:${project.version}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
     }
 }
 

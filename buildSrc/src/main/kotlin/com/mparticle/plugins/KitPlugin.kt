@@ -30,8 +30,8 @@ class KitPlugin : Plugin<Project> {
         android.run {
             compileSdkVersion(31)
             defaultConfig {
-                minSdkVersion(16)
-                targetSdkVersion(31)
+                minSdk = 16
+                targetSdk = 31
                 versionCode = 1
                 versionName = "1.0"
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
