@@ -11,6 +11,8 @@ import com.appsflyer.AFInAppEventType.*
 import com.appsflyer.AppsFlyerConversionListener
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.AppsFlyerProperties
+import com.appsflyer.deeplink.DeepLinkListener
+import com.appsflyer.deeplink.DeepLinkResult
 import com.mparticle.AttributionError
 import com.mparticle.AttributionResult
 import com.mparticle.MPEvent
@@ -50,6 +52,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         integrationAttributes[APPSFLYERID_INTEGRATION_KEY] =
             AppsFlyerLib.getInstance().getAppsFlyerUID(context)
         setIntegrationAttributes(integrationAttributes)
+        AppsFlyerLib.getInstance().subscribeForDeepLink(deepLinkListener())
 
         val messages: MutableList<ReportingMessage> = ArrayList()
         messages.add(
@@ -278,35 +281,47 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         }
     }
 
-    override fun onAppOpenAttribution(attributionDataN: MutableMap<String, String>?) {
-        var attributionData = attributionDataN
-        val jsonResult = JSONObject()
 
-        if (attributionData == null) {
-            attributionData = mutableMapOf()
-        }
+    fun deepLinkListener() = DeepLinkListener { deepLinkResult ->
+        val deepLinkObj = deepLinkResult.deepLink
 
-        attributionData[APP_OPEN_ATTRIBUTION_RESULT] = true.toString()
-
-        for ((key, value) in attributionData) {
-            try {
-                jsonResult.put(key, value)
-            } catch (e: JSONException) {
+        when (deepLinkResult.status) {
+            DeepLinkResult.Status.FOUND -> {
+                try {
+                    deepLinkObj.clickEvent.put(APP_OPEN_ATTRIBUTION_RESULT, true.toString())
+                    val result = AttributionResult()
+                        .setParameters(deepLinkObj.clickEvent)
+                        .setServiceProviderId(configuration.kitId)
+                    kitManager.onResult(result)
+                } catch (e: Exception) {
+                    return@DeepLinkListener
+                }
+            }
+            DeepLinkResult.Status.NOT_FOUND -> {
+                return@DeepLinkListener
+            }
+            else -> {
+                val dlError = deepLinkResult.error
+                if (!KitUtils.isEmpty(dlError.toString())) {
+                    val error = AttributionError()
+                        .setMessage(dlError.toString())
+                        .setServiceProviderId(configuration.kitId)
+                    kitManager.onError(error)
+                }
+                return@DeepLinkListener
             }
         }
-        val result = AttributionResult()
-            .setParameters(jsonResult)
-            .setServiceProviderId(configuration.kitId)
-        kitManager.onResult(result)
+    }
+
+
+    override fun onAppOpenAttribution(attributionDataN: MutableMap<String, String>?) {
+        //do nothing, Appsflyer new UDL implementation will use new deep linking method with both
+        // custom URI and appsflyer's Onelink
     }
 
     override fun onAttributionFailure(attributionFailure: String) {
-        if (!KitUtils.isEmpty(attributionFailure)) {
-            val error = AttributionError()
-                .setMessage(attributionFailure)
-                .setServiceProviderId(configuration.kitId)
-            kitManager.onError(error)
-        }
+        //do nothing, Appsflyer new UDL implementation will use new deep linking method with both
+        // custom URI and appsflyer's Onelink
     }
 
     override fun setInstallReferrer(intent: Intent) {
