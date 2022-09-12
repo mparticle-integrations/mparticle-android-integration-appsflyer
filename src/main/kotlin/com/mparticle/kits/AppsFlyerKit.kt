@@ -335,7 +335,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
 
     override fun onActivityCreated(
         activity: Activity,
-        bundle: Bundle
+        bundle: Bundle?
     ): List<ReportingMessage> {
         instance.start(activity)
         return emptyList()
@@ -351,7 +351,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
 
     override fun onActivitySaveInstanceState(
         activity: Activity,
-        bundle: Bundle
+        bundle: Bundle?
     ): List<ReportingMessage> = emptyList()
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
