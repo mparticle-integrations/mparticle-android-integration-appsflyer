@@ -5,9 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import com.appsflyer.AFInAppEventParameterName.*
+import com.appsflyer.AFInAppEventParameterName.CONTENT_ID
+import com.appsflyer.AFInAppEventParameterName.CONTENT_TYPE
+import com.appsflyer.AFInAppEventParameterName.CURRENCY
+import com.appsflyer.AFInAppEventParameterName.PRICE
+import com.appsflyer.AFInAppEventParameterName.QUANTITY
+import com.appsflyer.AFInAppEventParameterName.REVENUE
 import com.appsflyer.AFInAppEventType
-import com.appsflyer.AFInAppEventType.*
+import com.appsflyer.AFInAppEventType.ADD_TO_CART
+import com.appsflyer.AFInAppEventType.ADD_TO_WISH_LIST
+import com.appsflyer.AFInAppEventType.INITIATED_CHECKOUT
+import com.appsflyer.AFInAppEventType.PURCHASE
 import com.appsflyer.AppsFlyerConversionListener
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.AppsFlyerProperties
@@ -24,7 +32,7 @@ import com.mparticle.internal.MPUtility
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
-import java.util.*
+import java.util.LinkedList
 
 
 /**
@@ -374,24 +382,12 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         const val APP_OPEN_ATTRIBUTION_RESULT =
             "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT"
 
-        fun generateProductIdList(event: CommerceEvent?): String? {
-            if (event == null || event.products == null || event.products?.size == 0) {
-                return null
+        fun generateProductIdList(event: CommerceEvent?): List<String>? {
+            return event?.products?.filter { !KitUtils.isEmpty(it.sku) }?.let {
+                if (it.isNotEmpty()) {
+                    it.map { it.sku.replace(COMMA, "%2C") }
+                } else { null }
             }
-
-            val productIdList = StringBuilder()
-            event.products?.let {
-                for (product in it) {
-                    val sku = product.sku
-                    if (!KitUtils.isEmpty(sku)) {
-                        productIdList.append(sku.replace(COMMA, "%2C"))
-                        productIdList.append(COMMA)
-                    }
-                }
-            }
-            return if (productIdList.isNotEmpty()) {
-                productIdList.substring(0, productIdList.length - 1)
-            } else null
         }
     }
 }
