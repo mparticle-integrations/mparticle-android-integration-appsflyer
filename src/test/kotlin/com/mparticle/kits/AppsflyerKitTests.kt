@@ -67,19 +67,20 @@ class AppsflyerKitTests {
         val event = CommerceEvent.Builder(Product.PURCHASE, product)
             .transactionAttributes(TransactionAttributes("foo"))
             .build()
-        assertEquals("foo-sku", AppsFlyerKit.generateProductIdList(event))
+        assertEquals(mutableListOf("foo-sku"), AppsFlyerKit.generateProductIdList(event))
         val product2 = Product.Builder("foo-name-2", "foo-sku-2", 50.0).build()
         val event2 = CommerceEvent.Builder(Product.PURCHASE, product)
             .addProduct(product2)
             .transactionAttributes(TransactionAttributes("foo"))
             .build()
-        assertEquals("foo-sku,foo-sku-2", AppsFlyerKit.generateProductIdList(event2))
+        assertEquals(
+            mutableListOf("foo-sku","foo-sku-2"), AppsFlyerKit.generateProductIdList(event2))
         val product3 = Product.Builder("foo-name-3", "foo-sku-,3", 50.0).build()
         val event3 = CommerceEvent.Builder(Product.PURCHASE, product)
             .addProduct(product2)
             .addProduct(product3)
             .transactionAttributes(TransactionAttributes("foo"))
             .build()
-        assertEquals("foo-sku,foo-sku-2,foo-sku-%2C3", AppsFlyerKit.generateProductIdList(event3))
+        assertEquals(mutableListOf("foo-sku","foo-sku-2","foo-sku-%2C3"), AppsFlyerKit.generateProductIdList(event3))
     }
 }
