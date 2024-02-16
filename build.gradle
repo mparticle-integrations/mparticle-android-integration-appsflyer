@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    api 'com.appsflyer:af-android-sdk:6.10.0'
+    api 'com.appsflyer:af-android-sdk:6.12.2'
 }
 repositories {
     mavenCentral()
