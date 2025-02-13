@@ -35,12 +35,12 @@ apply plugin: 'kotlin-android'
 
 android {
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 19
     }
 }
 
 dependencies {
-    api 'com.appsflyer:af-android-sdk:6.13.0'
+    api 'com.appsflyer:af-android-sdk:6.16.0'
 }
 repositories {
     mavenCentral()
