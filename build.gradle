@@ -37,10 +37,17 @@ android {
     defaultConfig {
         minSdkVersion 19
     }
+    testOptions {
+        unitTests.all {
+            jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+        }
+    }
 }
 
 dependencies {
-    api 'com.appsflyer:af-android-sdk:6.16.0'
+    api 'com.appsflyer:af-android-sdk:6.17.3'
+    testImplementation files('libs/java-json.jar')
+    testImplementation files('libs/testutils.aar')
 }
 repositories {
     mavenCentral()
