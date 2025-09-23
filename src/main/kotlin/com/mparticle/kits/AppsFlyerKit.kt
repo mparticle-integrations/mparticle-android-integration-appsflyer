@@ -16,6 +16,7 @@ import com.appsflyer.AFInAppEventType.ADD_TO_CART
 import com.appsflyer.AFInAppEventType.ADD_TO_WISH_LIST
 import com.appsflyer.AFInAppEventType.INITIATED_CHECKOUT
 import com.appsflyer.AFInAppEventType.PURCHASE
+import com.appsflyer.AppsFlyerConsent
 import com.appsflyer.AppsFlyerConversionListener
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.AppsFlyerProperties
@@ -27,8 +28,10 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
+import com.mparticle.consent.ConsentState
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
@@ -40,7 +43,7 @@ import java.util.LinkedList
  */
 class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
     KitIntegration.AttributeListener, KitIntegration.CommerceListener,
-    AppsFlyerConversionListener, KitIntegration.ActivityListener {
+    AppsFlyerConversionListener, KitIntegration.ActivityListener, KitIntegration.UserAttributeListener {
 
 
     override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance();
@@ -54,6 +57,8 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         AppsFlyerLib.getInstance()
             .setDebugLog(MParticle.getInstance()?.environment == MParticle.Environment.Development)
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
+        val userConsentState = currentUser?.consentState
+        setConsent(userConsentState)
         AppsFlyerLib.getInstance().start(context.applicationContext)
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdEnabled())
         val integrationAttributes = HashMap<String, String?>(1)
@@ -232,6 +237,37 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
 
     override fun setUserAttribute(attributeKey: String, attributeValue: String) {}
     override fun setUserAttributeList(s: String, list: List<String>) {}
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?
+    ) {
+    }
+
+    override fun onRemoveUserAttribute(key: String?, user: FilteredMParticleUser?) {
+    }
+
+    override fun onSetUserAttribute(key: String?, value: Any?, user: FilteredMParticleUser?) {
+    }
+
+    override fun onSetUserTag(key: String?, user: FilteredMParticleUser?) {
+    }
+
+    override fun onSetUserAttributeList(
+        attributeKey: String?,
+        attributeValueList: MutableList<String>?,
+        user: FilteredMParticleUser?
+    ) {
+    }
+
+    override fun onSetAllUserAttributes(
+        userAttributes: MutableMap<String, String>?,
+        userAttributeLists: MutableMap<String, MutableList<String>>?,
+        user: FilteredMParticleUser?
+    ) {
+    }
+
     override fun supportsAttributeLists(): Boolean = true
     override fun setAllUserAttributes(map: Map<String, String>, map1: Map<String, List<String>>) {}
     override fun removeUserAttribute(key: String) {}
@@ -256,6 +292,141 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
     }
 
     override fun logout(): List<ReportingMessage> = emptyList()
+
+    private fun parseToNestedMap(jsonString: String): Map<String, Any> {
+        val topLevelMap = mutableMapOf<String, Any>()
+        try {
+            if (jsonString.isNullOrEmpty()) {
+                return topLevelMap
+            }
+            val jsonObject = JSONObject(jsonString)
+
+            for (key in jsonObject.keys()) {
+                val value = jsonObject.get(key)
+                if (value is JSONObject) {
+                    topLevelMap[key] = parseToNestedMap(value.toString())
+                } else {
+                    topLevelMap[key] = value
+                }
+            }
+        } catch (e: Exception) {
+            Logger.error(
+                e,
+                "The AppsFlyer kit was unable to parse the user's ConsentState, consent may not be set correctly on the AppsFlyer SDK"
+            )
+        }
+        return topLevelMap
+    }
+
+    private fun searchKeyInNestedMap(map: Map<*, *>, key: Any): Any? {
+        if (map.isNullOrEmpty()) {
+            return null
+        }
+        try {
+            for ((mapKey, mapValue) in map) {
+                if (mapKey.toString().equals(key.toString(), ignoreCase = true)) {
+                    return mapValue
+                }
+                if (mapValue is Map<*, *>) {
+                    val foundValue = searchKeyInNestedMap(mapValue, key)
+                    if (foundValue != null) {
+                        return foundValue
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Logger.error(
+                e,
+                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status."
+            )
+        }
+        return null
+    }
+
+    override fun onConsentStateUpdated(
+        consentState: ConsentState,
+        consentState1: ConsentState,
+        filteredMParticleUser: FilteredMParticleUser
+    ) {
+        setConsent(consentState1)
+    }
+
+    private fun setConsent(consentState: ConsentState?) {
+        if (settings[GDPR_APPLIES].isNullOrEmpty()) {
+            return
+        }
+        val appsFlyerGDPRUser: AppsFlyerConsent
+        if (!settings[GDPR_APPLIES].toBoolean()) {
+            appsFlyerGDPRUser = AppsFlyerConsent(false, null, null, null)
+        } else {
+            var adStorageConsentValue: Boolean? = null
+            when (settings[DEFAULT_AD_STORAGE_CONSENT]) {
+                AppsFlyerConsentValues.GRANTED.consentValue -> adStorageConsentValue = true
+                AppsFlyerConsentValues.DENIED.consentValue -> adStorageConsentValue = false
+            }
+
+            var adUserDataConsentValue: Boolean? = null
+            when (settings[DEFAULT_AD_USER_DATA_CONSENT]) {
+                AppsFlyerConsentValues.GRANTED.consentValue -> adUserDataConsentValue = true
+                AppsFlyerConsentValues.DENIED.consentValue -> adUserDataConsentValue = false
+            }
+
+            var adPersonalizationConsentValue: Boolean? = null
+            when (settings[DEFAULT_AD_PERSONALIZATION_CONSENT]) {
+                AppsFlyerConsentValues.GRANTED.consentValue -> adPersonalizationConsentValue = true
+                AppsFlyerConsentValues.DENIED.consentValue -> adPersonalizationConsentValue = false
+            }
+
+            val clientConsentSettings = parseToNestedMap(consentState.toString())
+
+            parseConsentMapping(settings[consentMapping]).iterator().forEach { currentConsent ->
+
+                val isConsentAvailable =
+                    searchKeyInNestedMap(clientConsentSettings, key = currentConsent.key)
+
+                if (isConsentAvailable != null) {
+                    val isConsentGranted: Boolean =
+                        JSONObject(isConsentAvailable.toString()).opt("consented") as Boolean
+
+                    when (currentConsent.value) {
+                        "ad_storage" -> adStorageConsentValue = isConsentGranted
+
+                        "ad_user_data" -> adUserDataConsentValue = isConsentGranted
+
+                        "ad_personalization" -> adPersonalizationConsentValue = isConsentGranted
+                    }
+                }
+            }
+            appsFlyerGDPRUser = AppsFlyerConsent(true, adUserDataConsentValue, adPersonalizationConsentValue, adStorageConsentValue)
+        }
+        AppsFlyerLib.getInstance().setConsentData(appsFlyerGDPRUser)
+    }
+
+    private fun parseConsentMapping(json: String?): Map<String, String> {
+        if (json.isNullOrEmpty()) {
+            return emptyMap()
+        }
+        val jsonWithFormat = json.replace("\\", "")
+
+        return try {
+            JSONArray(jsonWithFormat)
+                .let { jsonArray ->
+                    (0 until jsonArray.length())
+                        .associate {
+                            val jsonObject = jsonArray.getJSONObject(it)
+                            val map = jsonObject.getString("map")
+                            val value = jsonObject.getString("value")
+                            map to value
+                        }
+                }
+        } catch (jse: JSONException) {
+            Logger.error(
+                jse,
+                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status."
+            )
+            emptyMap()
+        }
+    }
 
     override fun onConversionDataSuccess(conversionDataN: MutableMap<String, Any>?) {
         var conversionData = conversionDataN
@@ -389,5 +560,16 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
                 } else { null }
             }
         }
+
+        private const val consentMapping = "consentMapping"
+        enum class AppsFlyerConsentValues(val consentValue: String) {
+            GRANTED("Granted"),
+            DENIED("Denied")
+        }
+
+        val GDPR_APPLIES = "gdprApplies"
+        val DEFAULT_AD_STORAGE_CONSENT = "defaultAdStorageConsent"
+        val DEFAULT_AD_USER_DATA_CONSENT = "defaultAdUserDataConsent"
+        val DEFAULT_AD_PERSONALIZATION_CONSENT = "defaultAdPersonalizationConsent"
     }
 }
