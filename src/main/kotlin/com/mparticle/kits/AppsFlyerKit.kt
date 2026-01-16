@@ -37,23 +37,23 @@ import org.json.JSONObject
 import java.math.BigDecimal
 import java.util.LinkedList
 
-
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
  */
-class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
-    KitIntegration.AttributeListener, KitIntegration.CommerceListener,
-    AppsFlyerConversionListener, KitIntegration.ActivityListener, KitIntegration.UserAttributeListener {
+class AppsFlyerKit :
+    KitIntegration(),
+    KitIntegration.EventListener,
+    KitIntegration.AttributeListener,
+    KitIntegration.CommerceListener,
+    AppsFlyerConversionListener,
+    KitIntegration.ActivityListener,
+    KitIntegration.UserAttributeListener {
 
-
-    override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance();
+    override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance()
 
     override fun getName() = NAME
 
-    public override fun onKitCreate(
-        setting: Map<String?, String?>?,
-        context: Context
-    ): List<ReportingMessage> {
+    public override fun onKitCreate(setting: Map<String?, String?>?, context: Context): List<ReportingMessage> {
         AppsFlyerLib.getInstance()
             .setDebugLog(MParticle.getInstance()?.environment == MParticle.Environment.Development)
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
@@ -73,34 +73,24 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
                 this,
                 ReportingMessage.MessageType.APP_STATE_TRANSITION,
                 System.currentTimeMillis(),
-                null
-            )
+                null,
+            ),
         )
         return messages
     }
 
     override fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage> = emptyList()
 
+    override fun logError(message: String, eventData: Map<String, String>): List<ReportingMessage> = emptyList()
 
-    override fun logError(
-        message: String,
-        eventData: Map<String, String>
-    ): List<ReportingMessage> = emptyList()
-
-
-    override fun logException(
-        exception: Exception,
-        eventData: Map<String, String>,
-        message: String
-    ): List<ReportingMessage> = emptyList()
+    override fun logException(exception: Exception, eventData: Map<String, String>, message: String): List<ReportingMessage> = emptyList()
 
     override fun logLtvIncrease(
         valueIncreased: BigDecimal,
         valueTotal: BigDecimal,
         eventName: String,
-        contextInfo: Map<String, String>
+        contextInfo: Map<String, String>,
     ): List<ReportingMessage> = emptyList()
-
 
     override fun logEvent(event: CommerceEvent): List<ReportingMessage> {
         val messages: MutableList<ReportingMessage> = LinkedList()
@@ -115,10 +105,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         return messages
     }
 
-    private fun logNotSalesEvent(
-        event: CommerceEvent,
-        messages: MutableList<ReportingMessage>
-    ) {
+    private fun logNotSalesEvent(event: CommerceEvent, messages: MutableList<ReportingMessage>) {
         val eventList = CommerceEventUtils.expand(event)
         if (eventList.isNotEmpty()) {
             for (e in eventList) {
@@ -136,7 +123,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         event: CommerceEvent,
         eventValues: MutableMap<String, Any?>,
         productList: MutableList<Product>?,
-        messages: MutableList<ReportingMessage>
+        messages: MutableList<ReportingMessage>,
     ) {
         event.customAttributes?.let { eventValues.putAll(it) }
 
@@ -144,12 +131,15 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
             eventValues[CURRENCY] = event.currency
         }
 
-        if (event.productAction == Product.ADD_TO_CART
-            || event.productAction == Product.ADD_TO_WISHLIST
+        if (event.productAction == Product.ADD_TO_CART ||
+            event.productAction == Product.ADD_TO_WISHLIST
         ) {
             val eventName =
-                if (event.productAction == Product.ADD_TO_CART) ADD_TO_CART
-                else ADD_TO_WISH_LIST
+                if (event.productAction == Product.ADD_TO_CART) {
+                    ADD_TO_CART
+                } else {
+                    ADD_TO_WISH_LIST
+                }
 
             productList?.iterator()?.forEach { product ->
                 val productEventValues: MutableMap<String, Any?> = hashMapOf()
@@ -169,8 +159,11 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
             }
         } else {
             val eventName =
-                if (event.productAction == Product.CHECKOUT)
-                    INITIATED_CHECKOUT else PURCHASE
+                if (event.productAction == Product.CHECKOUT) {
+                    INITIATED_CHECKOUT
+                } else {
+                    PURCHASE
+                }
             eventValues[CONTENT_ID] = generateProductIdList(event)
 
             if (!productList.isNullOrEmpty()) {
@@ -198,11 +191,12 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         }
     }
 
-    private fun isSalesEvent(event: CommerceEvent) =
-        (event.productAction == Product.ADD_TO_CART
-                || event.productAction == Product.ADD_TO_WISHLIST
-                || event.productAction == Product.CHECKOUT
-                || event.productAction == Product.PURCHASE)
+    private fun isSalesEvent(event: CommerceEvent) = (
+        event.productAction == Product.ADD_TO_CART ||
+            event.productAction == Product.ADD_TO_WISHLIST ||
+            event.productAction == Product.CHECKOUT ||
+            event.productAction == Product.PURCHASE
+        )
 
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
         var hashMap: HashMap<String?, Any?>? = hashMapOf()
@@ -215,11 +209,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         return messages
     }
 
-    override fun logScreen(
-        screenName: String,
-        eventAttributes: Map<String, String>
-    ): List<ReportingMessage> = emptyList()
-
+    override fun logScreen(screenName: String, eventAttributes: Map<String, String>): List<ReportingMessage> = emptyList()
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {
         instance.anonymizeUser(optOutStatus)
@@ -229,20 +219,15 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
                 this,
                 ReportingMessage.MessageType.OPT_OUT,
                 System.currentTimeMillis(),
-                null
-            ).setOptOut(optOutStatus)
+                null,
+            ).setOptOut(optOutStatus),
         )
         return messageList
     }
 
     override fun setUserAttribute(attributeKey: String, attributeValue: String) {}
     override fun setUserAttributeList(s: String, list: List<String>) {}
-    override fun onIncrementUserAttribute(
-        key: String?,
-        incrementedBy: Number?,
-        value: String?,
-        user: FilteredMParticleUser?
-    ) {
+    override fun onIncrementUserAttribute(key: String?, incrementedBy: Number?, value: String?, user: FilteredMParticleUser?) {
     }
 
     override fun onRemoveUserAttribute(key: String?, user: FilteredMParticleUser?) {
@@ -254,17 +239,13 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
     override fun onSetUserTag(key: String?, user: FilteredMParticleUser?) {
     }
 
-    override fun onSetUserAttributeList(
-        attributeKey: String?,
-        attributeValueList: MutableList<String>?,
-        user: FilteredMParticleUser?
-    ) {
+    override fun onSetUserAttributeList(attributeKey: String?, attributeValueList: MutableList<String>?, user: FilteredMParticleUser?) {
     }
 
     override fun onSetAllUserAttributes(
         userAttributes: MutableMap<String, String>?,
         userAttributeLists: MutableMap<String, MutableList<String>>?,
-        user: FilteredMParticleUser?
+        user: FilteredMParticleUser?,
     ) {
     }
 
@@ -312,7 +293,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         } catch (e: Exception) {
             Logger.error(
                 e,
-                "The AppsFlyer kit was unable to parse the user's ConsentState, consent may not be set correctly on the AppsFlyer SDK"
+                "The AppsFlyer kit was unable to parse the user's ConsentState, consent may not be set correctly on the AppsFlyer SDK",
             )
         }
         return topLevelMap
@@ -337,17 +318,13 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         } catch (e: Exception) {
             Logger.error(
                 e,
-                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status."
+                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status.",
             )
         }
         return null
     }
 
-    override fun onConsentStateUpdated(
-        consentState: ConsentState,
-        consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser
-    ) {
+    override fun onConsentStateUpdated(consentState: ConsentState, consentState1: ConsentState, filteredMParticleUser: FilteredMParticleUser) {
         setConsent(consentState1)
     }
 
@@ -379,7 +356,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
 
             val clientConsentSettings = parseToNestedMap(consentState.toString())
 
-            parseConsentMapping(settings[consentMapping]).iterator().forEach { currentConsent ->
+            parseConsentMapping(settings[CONSENT_MAPPING]).iterator().forEach { currentConsent ->
 
                 val isConsentAvailable =
                     searchKeyInNestedMap(clientConsentSettings, key = currentConsent.key)
@@ -422,7 +399,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         } catch (jse: JSONException) {
             Logger.error(
                 jse,
-                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status."
+                "The AppsFlyer kit threw an exception while searching for the configured consent purpose mapping in the current user's consent status.",
             )
             emptyMap()
         }
@@ -460,7 +437,6 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         }
     }
 
-
     fun deepLinkListener() = DeepLinkListener { deepLinkResult ->
         val deepLinkObj = deepLinkResult.deepLink
 
@@ -492,19 +468,18 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         }
     }
 
-
     override fun onAppOpenAttribution(attributionDataN: MutableMap<String, String>?) {
-        //do nothing, Appsflyer new UDL implementation will use new deep linking method with both
+        // do nothing, Appsflyer new UDL implementation will use new deep linking method with both
         // custom URI and appsflyer's Onelink
     }
 
     override fun onAttributionFailure(attributionFailure: String) {
-        //do nothing, Appsflyer new UDL implementation will use new deep linking method with both
+        // do nothing, Appsflyer new UDL implementation will use new deep linking method with both
         // custom URI and appsflyer's Onelink
     }
 
     override fun setInstallReferrer(intent: Intent) {
-        //do nothing, Appsflyer will fetch the install referrer data internally,
+        // do nothing, Appsflyer will fetch the install referrer data internally,
         // as long as the proper Play Install Referrer dependency is present.
     }
 
@@ -512,10 +487,7 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         instance.logLocation(context, location.latitude, location.longitude)
     }
 
-    override fun onActivityCreated(
-        activity: Activity,
-        bundle: Bundle?
-    ): List<ReportingMessage> {
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?): List<ReportingMessage> {
         instance.start(activity)
         return emptyList()
     }
@@ -528,13 +500,9 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
 
     override fun onActivityStopped(activity: Activity): List<ReportingMessage> = emptyList()
 
-    override fun onActivitySaveInstanceState(
-        activity: Activity,
-        bundle: Bundle?
-    ): List<ReportingMessage> = emptyList()
+    override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle?): List<ReportingMessage> = emptyList()
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
-
 
     companion object {
         const val DEV_KEY = "devKey"
@@ -553,23 +521,25 @@ class AppsFlyerKit : KitIntegration(), KitIntegration.EventListener,
         const val APP_OPEN_ATTRIBUTION_RESULT =
             "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT"
 
-        fun generateProductIdList(event: CommerceEvent?): List<String>? {
-            return event?.products?.filter { !KitUtils.isEmpty(it.sku) }?.let {
-                if (it.isNotEmpty()) {
-                    it.map { it.sku.replace(COMMA, "%2C") }
-                } else { null }
+        fun generateProductIdList(event: CommerceEvent?): List<String>? = event?.products?.filter { !KitUtils.isEmpty(it.sku) }?.let {
+            if (it.isNotEmpty()) {
+                it.map { it.sku.replace(COMMA, "%2C") }
+            } else {
+                null
             }
         }
 
-        private const val consentMapping = "consentMapping"
+        private const val CONSENT_MAPPING = "consentMapping"
+
+        @Suppress("ktlint:standard:property-naming")
         enum class AppsFlyerConsentValues(val consentValue: String) {
             GRANTED("Granted"),
-            DENIED("Denied")
+            DENIED("Denied"),
         }
 
-        val GDPR_APPLIES = "gdprApplies"
-        val DEFAULT_AD_STORAGE_CONSENT = "defaultAdStorageConsent"
-        val DEFAULT_AD_USER_DATA_CONSENT = "defaultAdUserDataConsent"
-        val DEFAULT_AD_PERSONALIZATION_CONSENT = "defaultAdPersonalizationConsent"
+        const val GDPR_APPLIES = "gdprApplies"
+        const val DEFAULT_AD_STORAGE_CONSENT = "defaultAdStorageConsent"
+        const val DEFAULT_AD_USER_DATA_CONSENT = "defaultAdUserDataConsent"
+        const val DEFAULT_AD_PERSONALIZATION_CONSENT = "defaultAdPersonalizationConsent"
     }
 }

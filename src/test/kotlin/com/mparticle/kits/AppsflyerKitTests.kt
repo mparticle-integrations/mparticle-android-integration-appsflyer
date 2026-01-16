@@ -3,12 +3,12 @@ package com.mparticle.kits
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import com.appsflyer.AppsFlyerLib
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.commerce.TransactionAttributes
-import com.appsflyer.AppsFlyerLib
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.identity.IdentityApi
@@ -30,7 +30,6 @@ import org.mockito.MockitoAnnotations
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
 
-
 class AppsflyerKitTests {
 
     private var kit = AppsFlyerKit()
@@ -51,13 +50,16 @@ class AppsflyerKitTests {
         MParticle.setInstance(mock(MParticle::class.java))
         Mockito.`when`(MParticle.getInstance()?.Identity()).thenReturn(
             mock(
-                IdentityApi::class.java
-            )
+                IdentityApi::class.java,
+            ),
         )
         val kitManager = KitManagerImpl(
             mock(
-                Context::class.java
-            ), null, emptyCoreCallbacks, mock(MParticleOptions::class.java)
+                Context::class.java,
+            ),
+            null,
+            emptyCoreCallbacks,
+            mock(MParticleOptions::class.java),
         )
         kit.kitManager = kitManager
         kit.configuration =
@@ -123,7 +125,8 @@ class AppsflyerKitTests {
             .transactionAttributes(TransactionAttributes("foo"))
             .build()
         assertEquals(
-            mutableListOf("foo-sku", "foo-sku-2"), AppsFlyerKit.generateProductIdList(event2)
+            mutableListOf("foo-sku", "foo-sku-2"),
+            AppsFlyerKit.generateProductIdList(event2),
         )
         val product3 = Product.Builder("foo-name-3", "foo-sku-,3", 50.0).build()
         val event3 = CommerceEvent.Builder(Product.PURCHASE, product)
@@ -133,7 +136,7 @@ class AppsflyerKitTests {
             .build()
         assertEquals(
             mutableListOf("foo-sku", "foo-sku-2", "foo-sku-%2C3"),
-            AppsFlyerKit.generateProductIdList(event3)
+            AppsFlyerKit.generateProductIdList(event3),
         )
     }
 
@@ -150,7 +153,6 @@ class AppsflyerKitTests {
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
-
 
         val marketingConsent = GDPRConsent.builder(false)
             .document("Test consent")
@@ -193,7 +195,6 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-
         val marketingConsent = GDPRConsent.builder(false)
             .document("Test consent")
             .location("17 Cherry Tree Lane")
@@ -234,7 +235,6 @@ class AppsflyerKitTests {
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
-
 
         val marketingConsent = GDPRConsent.builder(false)
             .document("Test consent")
@@ -279,7 +279,6 @@ class AppsflyerKitTests {
 
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
-
 
         val performanceConsent = GDPRConsent.builder(true)
             .document("Test consent")
@@ -336,7 +335,6 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-
         val performanceConsent = GDPRConsent.builder(true)
             .document("Test consent")
             .location("17 Cherry Tree Lane")
@@ -382,7 +380,6 @@ class AppsflyerKitTests {
         map["consentMapping"] =
             "[{\\\"jsmap\\\":null,\\\"map\\\":\\\"Performance\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_user_data\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"Marketing\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_personalization\\\"},{\\\"jsmap\\\":null,\\\"map\\\":\\\"testconsent\\\",\\\"maptype\\\":\\\"ConsentPurposes\\\",\\\"value\\\":\\\"ad_storage\\\"}]"
 
-
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
@@ -425,7 +422,6 @@ class AppsflyerKitTests {
 
     @Test
     fun onConsentStateUpdatedTest_When_No_DATA_From_Server() {
-
         val marketingConsent = GDPRConsent.builder(true)
             .document("Test consent")
             .location("17 Cherry Tree Lane")
@@ -496,7 +492,6 @@ class AppsflyerKitTests {
         val expectedConsentValue4 =
             afConsentResults.getValue("hasConsentForAdStorage")
         TestCase.assertEquals(true, expectedConsentValue4)
-
     }
 
     @Test
@@ -543,7 +538,7 @@ class AppsflyerKitTests {
 
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
             "parseToNestedMap",
-            String::class.java
+            String::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
@@ -556,7 +551,7 @@ class AppsflyerKitTests {
 
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
             "parseToNestedMap",
-            String::class.java
+            String::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
@@ -570,13 +565,14 @@ class AppsflyerKitTests {
             "marketing" to mapOf(
                 "consented" to false,
                 "document" to mapOf(
-                    "timestamp" to 1711038269644
-                )
-            )
+                    "timestamp" to 1711038269644,
+                ),
+            ),
         )
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "searchKeyInNestedMap", Map::class.java,
-            Any::class.java
+            "searchKeyInNestedMap",
+            Map::class.java,
+            Any::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, map, "")
@@ -587,8 +583,9 @@ class AppsflyerKitTests {
     fun testSearchKeyInNestedMap_When_Input_Is_Empty_Map() {
         val emptyMap: Map<String, Int> = emptyMap()
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "searchKeyInNestedMap", Map::class.java,
-            Any::class.java
+            "searchKeyInNestedMap",
+            Map::class.java,
+            Any::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, emptyMap, "1")
@@ -600,7 +597,7 @@ class AppsflyerKitTests {
         val emptyJson = ""
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
             "parseConsentMapping",
-            String::class.java
+            String::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, emptyJson)
@@ -613,7 +610,7 @@ class AppsflyerKitTests {
             "{'GDPR':{'marketing':'{:false,'timestamp':1711038269644:'Test consent','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}','performance':'{'consented':true,'timestamp':1711038269644,'document':'parental_consent_agreement_v2','location':'17 Cherry Tree Lan 3','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'},'CCPA':'{'consented':true,'timestamp':1711038269644,'document':'ccpa_consent_agreement_v3','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'}"
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
             "parseConsentMapping",
-            String::class.java
+            String::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
@@ -624,7 +621,7 @@ class AppsflyerKitTests {
     fun testParseConsentMapping_When_Input_Is_NULL() {
         val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
             "parseConsentMapping",
-            String::class.java
+            String::class.java,
         )
         method.isAccessible = true
         val result = method.invoke(kit, null)
@@ -659,22 +656,19 @@ class AppsflyerKitTests {
 
         override fun getLaunchAction(): String? = null
 
-        override fun getKitListener(): KitListener {
-            return object : KitListener {
-                override fun kitFound(kitId: Int) {}
-                override fun kitConfigReceived(kitId: Int, configuration: String?) {}
-                override fun kitExcluded(kitId: Int, reason: String?) {}
-                override fun kitStarted(kitId: Int) {}
-                override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {}
-                override fun onKitApiCalled(
-                    methodName: String?,
-                    kitId: Int,
-                    used: Boolean?,
-                    vararg objects: Any?
-                ) {
-                }
+        override fun getKitListener(): KitListener = object : KitListener {
+            override fun kitFound(kitId: Int) {}
+            override fun kitConfigReceived(kitId: Int, configuration: String?) {}
+            override fun kitExcluded(kitId: Int, reason: String?) {}
+            override fun kitStarted(kitId: Int) {}
+            override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {}
+            override fun onKitApiCalled(
+                methodName: String?,
+                kitId: Int,
+                used: Boolean?,
+                vararg objects: Any?,
+            ) {
             }
         }
-
     }
 }
