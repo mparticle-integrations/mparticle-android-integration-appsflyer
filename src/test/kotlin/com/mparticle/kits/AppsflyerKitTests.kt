@@ -31,7 +31,6 @@ import java.lang.ref.WeakReference
 import java.lang.reflect.Method
 
 class AppsflyerKitTests {
-
     private var kit = AppsFlyerKit()
     private var appsflyer = AppsFlyerLib()
 
@@ -48,19 +47,21 @@ class AppsflyerKitTests {
         kit = AppsFlyerKit()
         MockitoAnnotations.initMocks(this)
         MParticle.setInstance(mock(MParticle::class.java))
-        Mockito.`when`(MParticle.getInstance()?.Identity()).thenReturn(
-            mock(
-                IdentityApi::class.java,
-            ),
-        )
-        val kitManager = KitManagerImpl(
-            mock(
-                Context::class.java,
-            ),
-            null,
-            emptyCoreCallbacks,
-            mock(MParticleOptions::class.java),
-        )
+        Mockito.`when`(MParticle.getInstance()?.Identity())
+            .thenReturn(
+                mock(
+                    IdentityApi::class.java,
+                ),
+            )
+        val kitManager =
+            KitManagerImpl(
+                mock(
+                    Context::class.java,
+                ),
+                null,
+                emptyCoreCallbacks,
+                mock(MParticleOptions::class.java),
+            )
         kit.kitManager = kitManager
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("id", "-1"))
@@ -115,25 +116,28 @@ class AppsflyerKitTests {
             .thenReturn(MParticle.Environment.Production)
         Assert.assertNull(AppsFlyerKit.generateProductIdList(null))
         val product = Product.Builder("foo-name", "foo-sku", 50.0).build()
-        val event = CommerceEvent.Builder(Product.PURCHASE, product)
-            .transactionAttributes(TransactionAttributes("foo"))
-            .build()
+        val event =
+            CommerceEvent.Builder(Product.PURCHASE, product)
+                .transactionAttributes(TransactionAttributes("foo"))
+                .build()
         assertEquals(mutableListOf("foo-sku"), AppsFlyerKit.generateProductIdList(event))
         val product2 = Product.Builder("foo-name-2", "foo-sku-2", 50.0).build()
-        val event2 = CommerceEvent.Builder(Product.PURCHASE, product)
-            .addProduct(product2)
-            .transactionAttributes(TransactionAttributes("foo"))
-            .build()
+        val event2 =
+            CommerceEvent.Builder(Product.PURCHASE, product)
+                .addProduct(product2)
+                .transactionAttributes(TransactionAttributes("foo"))
+                .build()
         assertEquals(
             mutableListOf("foo-sku", "foo-sku-2"),
             AppsFlyerKit.generateProductIdList(event2),
         )
         val product3 = Product.Builder("foo-name-3", "foo-sku-,3", 50.0).build()
-        val event3 = CommerceEvent.Builder(Product.PURCHASE, product)
-            .addProduct(product2)
-            .addProduct(product3)
-            .transactionAttributes(TransactionAttributes("foo"))
-            .build()
+        val event3 =
+            CommerceEvent.Builder(Product.PURCHASE, product)
+                .addProduct(product2)
+                .addProduct(product3)
+                .transactionAttributes(TransactionAttributes("foo"))
+                .build()
         assertEquals(
             mutableListOf("foo-sku", "foo-sku-2", "foo-sku-%2C3"),
             AppsFlyerKit.generateProductIdList(event3),
@@ -168,16 +172,20 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(false, expectedConsentValue)
 
-        val notExpectedConsentKey = afConsentResults.containsKey("hasConsentForDataUsage")
+        val notExpectedConsentKey =
+            afConsentResults.containsKey("hasConsentForDataUsage")
         TestCase.assertEquals(false, notExpectedConsentKey)
 
-        val notExpectedConsentKey2 = afConsentResults.containsKey("hasConsentForAdsPersonalization")
+        val notExpectedConsentKey2 =
+            afConsentResults.containsKey("hasConsentForAdsPersonalization")
         TestCase.assertEquals(false, notExpectedConsentKey2)
 
-        val notExpectedConsentKey3 = afConsentResults.containsKey("hasConsentForAdStorage")
+        val notExpectedConsentKey3 =
+            afConsentResults.containsKey("hasConsentForAdStorage")
         TestCase.assertEquals(false, notExpectedConsentKey3)
     }
 
@@ -209,16 +217,20 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
-        val notExpectedConsentKey = afConsentResults.containsKey("hasConsentForDataUsage")
+        val notExpectedConsentKey =
+            afConsentResults.containsKey("hasConsentForDataUsage")
         TestCase.assertEquals(false, notExpectedConsentKey)
 
-        val notExpectedConsentKey2 = afConsentResults.containsKey("hasConsentForAdsPersonalization")
+        val notExpectedConsentKey2 =
+            afConsentResults.containsKey("hasConsentForAdsPersonalization")
         TestCase.assertEquals(false, notExpectedConsentKey2)
 
-        val notExpectedConsentKey3 = afConsentResults.containsKey("hasConsentForAdStorage")
+        val notExpectedConsentKey3 =
+            afConsentResults.containsKey("hasConsentForAdStorage")
         TestCase.assertEquals(false, notExpectedConsentKey3)
     }
 
@@ -250,19 +262,23 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
-            afConsentResults.getValue("hasConsentForDataUsage")
+            afConsentResults
+                .getValue("hasConsentForDataUsage")
         TestCase.assertEquals(false, expectedConsentValue2)
 
         val expectedConsentValue3 =
-            afConsentResults.getValue("hasConsentForAdsPersonalization")
+            afConsentResults
+                .getValue("hasConsentForAdsPersonalization")
         TestCase.assertEquals(true, expectedConsentValue3)
 
         val expectedConsentValue4 =
-            afConsentResults.getValue("hasConsentForAdStorage")
+            afConsentResults
+                .getValue("hasConsentForAdStorage")
         TestCase.assertEquals(true, expectedConsentValue4)
     }
 
@@ -306,19 +322,23 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
-            afConsentResults.getValue("hasConsentForDataUsage")
+            afConsentResults
+                .getValue("hasConsentForDataUsage")
         TestCase.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
-            afConsentResults.getValue("hasConsentForAdsPersonalization")
+            afConsentResults
+                .getValue("hasConsentForAdsPersonalization")
         TestCase.assertEquals(false, expectedConsentValue3)
 
         val expectedConsentValue4 =
-            afConsentResults.getValue("hasConsentForAdStorage")
+            afConsentResults
+                .getValue("hasConsentForAdStorage")
         TestCase.assertEquals(false, expectedConsentValue4)
     }
 
@@ -357,19 +377,23 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
-            afConsentResults.getValue("hasConsentForDataUsage")
+            afConsentResults
+                .getValue("hasConsentForDataUsage")
         TestCase.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
-            afConsentResults.getValue("hasConsentForAdsPersonalization")
+            afConsentResults
+                .getValue("hasConsentForAdsPersonalization")
         TestCase.assertEquals(true, expectedConsentValue3)
 
         val expectedConsentValue4 =
-            afConsentResults.getValue("hasConsentForAdStorage")
+            afConsentResults
+                .getValue("hasConsentForAdStorage")
         TestCase.assertEquals(true, expectedConsentValue4)
     }
 
@@ -404,15 +428,18 @@ class AppsflyerKitTests {
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
-            afConsentResults.getValue("hasConsentForDataUsage")
+            afConsentResults
+                .getValue("hasConsentForDataUsage")
         TestCase.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
-            afConsentResults.getValue("hasConsentForAdsPersonalization")
+            afConsentResults
+                .getValue("hasConsentForAdsPersonalization")
         TestCase.assertEquals(true, expectedConsentValue3)
 
         val notExpectedConsentKey =
@@ -478,19 +505,23 @@ class AppsflyerKitTests {
 
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
-            afConsentResults.getValue("hasConsentForDataUsage")
+            afConsentResults
+                .getValue("hasConsentForDataUsage")
         TestCase.assertEquals(false, expectedConsentValue2)
 
         val expectedConsentValue3 =
-            afConsentResults.getValue("hasConsentForAdsPersonalization")
+            afConsentResults
+                .getValue("hasConsentForAdsPersonalization")
         TestCase.assertEquals(false, expectedConsentValue3)
 
         val expectedConsentValue4 =
-            afConsentResults.getValue("hasConsentForAdStorage")
+            afConsentResults
+                .getValue("hasConsentForAdStorage")
         TestCase.assertEquals(true, expectedConsentValue4)
     }
 
@@ -527,7 +558,8 @@ class AppsflyerKitTests {
         TestCase.assertEquals(1, appsflyer.getConsentState().size)
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
-            afConsentResults.getValue("isUserSubjectToGDPR")
+            afConsentResults
+                .getValue("isUserSubjectToGDPR")
         TestCase.assertEquals(false, expectedConsentValue)
     }
 
@@ -536,10 +568,11 @@ class AppsflyerKitTests {
         var jsonInput =
             "{'GDPR':{'marketing':'{:false,'timestamp':1711038269644:'Test consent','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}','performance':'{'consented':true,'timestamp':1711038269644,'document':'parental_consent_agreement_v2','location':'17 Cherry Tree Lan 3','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'},'CCPA':'{'consented':true,'timestamp':1711038269644,'document':'ccpa_consent_agreement_v3','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'}"
 
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "parseToNestedMap",
-            String::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseToNestedMap",
+                String::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
         Assert.assertEquals(mutableMapOf<String, Any>(), result)
@@ -549,10 +582,11 @@ class AppsflyerKitTests {
     fun testParseToNestedMap_When_JSON_Is_Empty() {
         var jsonInput = ""
 
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "parseToNestedMap",
-            String::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseToNestedMap",
+                String::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
         Assert.assertEquals(mutableMapOf<String, Any>(), result)
@@ -560,20 +594,22 @@ class AppsflyerKitTests {
 
     @Test
     fun testSearchKeyInNestedMap_When_Input_Key_Is_Empty_String() {
-        val map = mapOf(
-            "GDPR" to true,
-            "marketing" to mapOf(
-                "consented" to false,
-                "document" to mapOf(
-                    "timestamp" to 1711038269644,
+        val map =
+            mapOf(
+                "GDPR" to true,
+                "marketing" to mapOf(
+                    "consented" to false,
+                    "document" to mapOf(
+                        "timestamp" to 1711038269644,
+                    ),
                 ),
-            ),
-        )
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "searchKeyInNestedMap",
-            Map::class.java,
-            Any::class.java,
-        )
+            )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "searchKeyInNestedMap",
+                Map::class.java,
+                Any::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, map, "")
         Assert.assertEquals(null, result)
@@ -582,11 +618,12 @@ class AppsflyerKitTests {
     @Test
     fun testSearchKeyInNestedMap_When_Input_Is_Empty_Map() {
         val emptyMap: Map<String, Int> = emptyMap()
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "searchKeyInNestedMap",
-            Map::class.java,
-            Any::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "searchKeyInNestedMap",
+                Map::class.java,
+                Any::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, emptyMap, "1")
         Assert.assertEquals(null, result)
@@ -595,10 +632,11 @@ class AppsflyerKitTests {
     @Test
     fun testParseConsentMapping_When_Input_Is_Empty_Json() {
         val emptyJson = ""
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "parseConsentMapping",
-            String::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseConsentMapping",
+                String::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, emptyJson)
         Assert.assertEquals(emptyMap<String, String>(), result)
@@ -608,10 +646,11 @@ class AppsflyerKitTests {
     fun testParseConsentMapping_When_Input_Is_Invalid_Json() {
         var jsonInput =
             "{'GDPR':{'marketing':'{:false,'timestamp':1711038269644:'Test consent','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}','performance':'{'consented':true,'timestamp':1711038269644,'document':'parental_consent_agreement_v2','location':'17 Cherry Tree Lan 3','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'},'CCPA':'{'consented':true,'timestamp':1711038269644,'document':'ccpa_consent_agreement_v3','location':'17 Cherry Tree Lane','hardware_id':'IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702'}'}"
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "parseConsentMapping",
-            String::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseConsentMapping",
+                String::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, jsonInput)
         Assert.assertEquals(emptyMap<String, String>(), result)
@@ -619,10 +658,11 @@ class AppsflyerKitTests {
 
     @Test
     fun testParseConsentMapping_When_Input_Is_NULL() {
-        val method: Method = AppsFlyerKit::class.java.getDeclaredMethod(
-            "parseConsentMapping",
-            String::class.java,
-        )
+        val method: Method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseConsentMapping",
+                String::class.java,
+            )
         method.isAccessible = true
         val result = method.invoke(kit, null)
         Assert.assertEquals(emptyMap<String, String>(), result)

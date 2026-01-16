@@ -48,14 +48,18 @@ class AppsFlyerKit :
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,
     KitIntegration.UserAttributeListener {
-
     override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance()
 
     override fun getName() = NAME
 
-    public override fun onKitCreate(setting: Map<String?, String?>?, context: Context): List<ReportingMessage> {
+    public override fun onKitCreate(
+        setting: Map<String?, String?>?,
+        context: Context,
+    ): List<ReportingMessage> {
         AppsFlyerLib.getInstance()
-            .setDebugLog(MParticle.getInstance()?.environment == MParticle.Environment.Development)
+            .setDebugLog(
+                MParticle.getInstance()?.environment == MParticle.Environment.Development,
+            )
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
@@ -81,9 +85,16 @@ class AppsFlyerKit :
 
     override fun leaveBreadcrumb(breadcrumb: String): List<ReportingMessage> = emptyList()
 
-    override fun logError(message: String, eventData: Map<String, String>): List<ReportingMessage> = emptyList()
+    override fun logError(
+        message: String,
+        eventData: Map<String, String>,
+    ): List<ReportingMessage> = emptyList()
 
-    override fun logException(exception: Exception, eventData: Map<String, String>, message: String): List<ReportingMessage> = emptyList()
+    override fun logException(
+        exception: Exception,
+        eventData: Map<String, String>,
+        message: String,
+    ): List<ReportingMessage> = emptyList()
 
     override fun logLtvIncrease(
         valueIncreased: BigDecimal,
@@ -105,7 +116,10 @@ class AppsFlyerKit :
         return messages
     }
 
-    private fun logNotSalesEvent(event: CommerceEvent, messages: MutableList<ReportingMessage>) {
+    private fun logNotSalesEvent(
+        event: CommerceEvent,
+        messages: MutableList<ReportingMessage>,
+    ) {
         val eventList = CommerceEventUtils.expand(event)
         if (eventList.isNotEmpty()) {
             for (e in eventList) {
@@ -191,11 +205,12 @@ class AppsFlyerKit :
         }
     }
 
-    private fun isSalesEvent(event: CommerceEvent) = (
-        event.productAction == Product.ADD_TO_CART ||
-            event.productAction == Product.ADD_TO_WISHLIST ||
-            event.productAction == Product.CHECKOUT ||
-            event.productAction == Product.PURCHASE
+    private fun isSalesEvent(event: CommerceEvent) =
+        (
+            event.productAction == Product.ADD_TO_CART ||
+                event.productAction == Product.ADD_TO_WISHLIST ||
+                event.productAction == Product.CHECKOUT ||
+                event.productAction == Product.PURCHASE
         )
 
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
@@ -209,7 +224,10 @@ class AppsFlyerKit :
         return messages
     }
 
-    override fun logScreen(screenName: String, eventAttributes: Map<String, String>): List<ReportingMessage> = emptyList()
+    override fun logScreen(
+        screenName: String,
+        eventAttributes: Map<String, String>,
+    ): List<ReportingMessage> = emptyList()
 
     override fun setOptOut(optOutStatus: Boolean): List<ReportingMessage> {
         instance.anonymizeUser(optOutStatus)
@@ -226,20 +244,41 @@ class AppsFlyerKit :
     }
 
     override fun setUserAttribute(attributeKey: String, attributeValue: String) {}
+
     override fun setUserAttributeList(s: String, list: List<String>) {}
-    override fun onIncrementUserAttribute(key: String?, incrementedBy: Number?, value: String?, user: FilteredMParticleUser?) {
+
+    override fun onIncrementUserAttribute(
+        key: String?,
+        incrementedBy: Number?,
+        value: String?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
-    override fun onRemoveUserAttribute(key: String?, user: FilteredMParticleUser?) {
+    override fun onRemoveUserAttribute(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
-    override fun onSetUserAttribute(key: String?, value: Any?, user: FilteredMParticleUser?) {
+    override fun onSetUserAttribute(
+        key: String?,
+        value: Any?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
-    override fun onSetUserTag(key: String?, user: FilteredMParticleUser?) {
+    override fun onSetUserTag(
+        key: String?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
-    override fun onSetUserAttributeList(attributeKey: String?, attributeValueList: MutableList<String>?, user: FilteredMParticleUser?) {
+    override fun onSetUserAttributeList(
+        attributeKey: String?,
+        attributeValueList: MutableList<String>?,
+        user: FilteredMParticleUser?,
+    ) {
     }
 
     override fun onSetAllUserAttributes(
@@ -250,7 +289,12 @@ class AppsFlyerKit :
     }
 
     override fun supportsAttributeLists(): Boolean = true
-    override fun setAllUserAttributes(map: Map<String, String>, map1: Map<String, List<String>>) {}
+
+    override fun setAllUserAttributes(
+        map: Map<String, String>,
+        map1: Map<String, List<String>>,
+    ) {}
+
     override fun removeUserAttribute(key: String) {}
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {
@@ -262,7 +306,10 @@ class AppsFlyerKit :
         }
     }
 
-    override fun setUserIdentity(identityType: MParticle.IdentityType, identity: String) {
+    override fun setUserIdentity(
+        identityType: MParticle.IdentityType,
+        identity: String,
+    ) {
         with(instance) {
             if (MParticle.IdentityType.CustomerId == identityType) {
                 setCustomerUserId(identity)
@@ -299,7 +346,10 @@ class AppsFlyerKit :
         return topLevelMap
     }
 
-    private fun searchKeyInNestedMap(map: Map<*, *>, key: Any): Any? {
+    private fun searchKeyInNestedMap(
+        map: Map<*, *>,
+        key: Any,
+    ): Any? {
         if (map.isNullOrEmpty()) {
             return null
         }
@@ -324,7 +374,11 @@ class AppsFlyerKit :
         return null
     }
 
-    override fun onConsentStateUpdated(consentState: ConsentState, consentState1: ConsentState, filteredMParticleUser: FilteredMParticleUser) {
+    override fun onConsentStateUpdated(
+        consentState: ConsentState,
+        consentState1: ConsentState,
+        filteredMParticleUser: FilteredMParticleUser,
+    ) {
         setConsent(consentState1)
     }
 
@@ -422,31 +476,35 @@ class AppsFlyerKit :
             }
         }
 
-        val result = AttributionResult()
-            .setParameters(jsonResult)
-            .setServiceProviderId(configuration.kitId)
+        val result =
+            AttributionResult()
+                .setParameters(jsonResult)
+                .setServiceProviderId(configuration.kitId)
         kitManager.onResult(result)
     }
 
     override fun onConversionDataFail(conversionFailure: String) {
         if (!KitUtils.isEmpty(conversionFailure)) {
-            val error = AttributionError()
-                .setMessage(conversionFailure)
-                .setServiceProviderId(configuration.kitId)
+            val error =
+                AttributionError()
+                    .setMessage(conversionFailure)
+                    .setServiceProviderId(configuration.kitId)
             kitManager.onError(error)
         }
     }
 
-    fun deepLinkListener() = DeepLinkListener { deepLinkResult ->
+    fun deepLinkListener() =
+        DeepLinkListener { deepLinkResult ->
         val deepLinkObj = deepLinkResult.deepLink
 
         when (deepLinkResult.status) {
             DeepLinkResult.Status.FOUND -> {
                 try {
                     deepLinkObj.clickEvent.put(APP_OPEN_ATTRIBUTION_RESULT, true.toString())
-                    val result = AttributionResult()
-                        .setParameters(deepLinkObj.clickEvent)
-                        .setServiceProviderId(configuration.kitId)
+                    val result =
+                        AttributionResult()
+                            .setParameters(deepLinkObj.clickEvent)
+                            .setServiceProviderId(configuration.kitId)
                     kitManager.onResult(result)
                 } catch (e: Exception) {
                     return@DeepLinkListener
@@ -458,9 +516,10 @@ class AppsFlyerKit :
             else -> {
                 val dlError = deepLinkResult.error
                 if (!KitUtils.isEmpty(dlError.toString())) {
-                    val error = AttributionError()
-                        .setMessage(dlError.toString())
-                        .setServiceProviderId(configuration.kitId)
+                    val error =
+                        AttributionError()
+                            .setMessage(dlError.toString())
+                            .setServiceProviderId(configuration.kitId)
                     kitManager.onError(error)
                 }
                 return@DeepLinkListener
@@ -487,7 +546,10 @@ class AppsFlyerKit :
         instance.logLocation(context, location.latitude, location.longitude)
     }
 
-    override fun onActivityCreated(activity: Activity, bundle: Bundle?): List<ReportingMessage> {
+    override fun onActivityCreated(
+        activity: Activity,
+        bundle: Bundle?,
+    ): List<ReportingMessage> {
         instance.start(activity)
         return emptyList()
     }
@@ -500,7 +562,10 @@ class AppsFlyerKit :
 
     override fun onActivityStopped(activity: Activity): List<ReportingMessage> = emptyList()
 
-    override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle?): List<ReportingMessage> = emptyList()
+    override fun onActivitySaveInstanceState(
+        activity: Activity,
+        bundle: Bundle?,
+    ): List<ReportingMessage> = emptyList()
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
 
@@ -521,18 +586,21 @@ class AppsFlyerKit :
         const val APP_OPEN_ATTRIBUTION_RESULT =
             "MPARTICLE_APPSFLYER_APP_OPEN_ATTRIBUTION_RESULT"
 
-        fun generateProductIdList(event: CommerceEvent?): List<String>? = event?.products?.filter { !KitUtils.isEmpty(it.sku) }?.let {
-            if (it.isNotEmpty()) {
-                it.map { it.sku.replace(COMMA, "%2C") }
-            } else {
-                null
+        fun generateProductIdList(event: CommerceEvent?): List<String>? =
+            event?.products?.filter { !KitUtils.isEmpty(it.sku) }?.let {
+                if (it.isNotEmpty()) {
+                    it.map { it.sku.replace(COMMA, "%2C") }
+                } else {
+                    null
+                }
             }
-        }
 
         private const val CONSENT_MAPPING = "consentMapping"
 
         @Suppress("ktlint:standard:property-naming")
-        enum class AppsFlyerConsentValues(val consentValue: String) {
+        enum class AppsFlyerConsentValues(
+            val consentValue: String,
+        ) {
             GRANTED("Granted"),
             DENIED("Denied"),
         }
