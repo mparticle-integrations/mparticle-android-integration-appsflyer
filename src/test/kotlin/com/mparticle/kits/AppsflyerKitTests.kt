@@ -47,7 +47,8 @@ class AppsflyerKitTests {
         kit = AppsFlyerKit()
         MockitoAnnotations.initMocks(this)
         MParticle.setInstance(mock(MParticle::class.java))
-        Mockito.`when`(MParticle.getInstance()?.Identity())
+        Mockito
+            .`when`(MParticle.getInstance()?.Identity())
             .thenReturn(
                 mock(
                     IdentityApi::class.java,
@@ -112,18 +113,21 @@ class AppsflyerKitTests {
     @Throws(Exception::class)
     fun testGenerateSkuString() {
         MParticle.setInstance(mock(MParticle::class.java))
-        Mockito.`when`(MParticle.getInstance()?.environment)
+        Mockito
+            .`when`(MParticle.getInstance()?.environment)
             .thenReturn(MParticle.Environment.Production)
         Assert.assertNull(AppsFlyerKit.generateProductIdList(null))
         val product = Product.Builder("foo-name", "foo-sku", 50.0).build()
         val event =
-            CommerceEvent.Builder(Product.PURCHASE, product)
+            CommerceEvent
+                .Builder(Product.PURCHASE, product)
                 .transactionAttributes(TransactionAttributes("foo"))
                 .build()
         assertEquals(mutableListOf("foo-sku"), AppsFlyerKit.generateProductIdList(event))
         val product2 = Product.Builder("foo-name-2", "foo-sku-2", 50.0).build()
         val event2 =
-            CommerceEvent.Builder(Product.PURCHASE, product)
+            CommerceEvent
+                .Builder(Product.PURCHASE, product)
                 .addProduct(product2)
                 .transactionAttributes(TransactionAttributes("foo"))
                 .build()
@@ -133,7 +137,8 @@ class AppsflyerKitTests {
         )
         val product3 = Product.Builder("foo-name-3", "foo-sku-,3", 50.0).build()
         val event3 =
-            CommerceEvent.Builder(Product.PURCHASE, product)
+            CommerceEvent
+                .Builder(Product.PURCHASE, product)
                 .addProduct(product2)
                 .addProduct(product3)
                 .transactionAttributes(TransactionAttributes("foo"))
@@ -158,14 +163,18 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(false)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(false)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -203,14 +212,18 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(false)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val state = ConsentState.builder()
-            .addGDPRConsentState("test1", marketingConsent)
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(false)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("test1", marketingConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -248,14 +261,18 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(false)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val state = ConsentState.builder()
-            .addGDPRConsentState("test1", marketingConsent)
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(false)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("test1", marketingConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -296,26 +313,34 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val marketingConsent = GDPRConsent.builder(false)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val testConsent = GDPRConsent.builder(false)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Performance", performanceConsent)
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .addGDPRConsentState("testconsent", testConsent)
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(false)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val testConsent =
+            GDPRConsent
+                .builder(false)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Performance", performanceConsent)
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .addGDPRConsentState("testconsent", testConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -355,22 +380,28 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val marketingConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Performance", performanceConsent)
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Performance", performanceConsent)
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -407,22 +438,28 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("parental_consent_agreement_v2")
-            .location("17 Cherry Tree Lan 3")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("parental_consent_agreement_v2")
+                .location("17 Cherry Tree Lan 3")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .addGDPRConsentState("Performance", performanceConsent)
-            .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .addGDPRConsentState("Performance", performanceConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -449,22 +486,28 @@ class AppsflyerKitTests {
 
     @Test
     fun onConsentStateUpdatedTest_When_No_DATA_From_Server() {
-        val marketingConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("parental_consent_agreement_v2")
-            .location("17 Cherry Tree Lan 3")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("parental_consent_agreement_v2")
+                .location("17 Cherry Tree Lan 3")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .addGDPRConsentState("Performance", performanceConsent)
-            .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .addGDPRConsentState("Performance", performanceConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -483,22 +526,28 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("parental_consent_agreement_v2")
-            .location("17 Cherry Tree Lan 3")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("parental_consent_agreement_v2")
+                .location("17 Cherry Tree Lan 3")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .addGDPRConsentState("Performance", performanceConsent)
-            .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .addGDPRConsentState("Performance", performanceConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -536,21 +585,27 @@ class AppsflyerKitTests {
         kit.configuration =
             KitConfiguration.createKitConfiguration(JSONObject().put("as", map.toMutableMap()))
 
-        val marketingConsent = GDPRConsent.builder(true)
-            .document("Test consent")
-            .location("17 Cherry Tree Lane")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
+        val marketingConsent =
+            GDPRConsent
+                .builder(true)
+                .document("Test consent")
+                .location("17 Cherry Tree Lane")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
 
-        val performanceConsent = GDPRConsent.builder(true)
-            .document("parental_consent_agreement_v2")
-            .location("17 Cherry Tree Lan 3")
-            .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
-            .build()
-        val state = ConsentState.builder()
-            .addGDPRConsentState("Marketing", marketingConsent)
-            .addGDPRConsentState("Performance", performanceConsent)
-            .build()
+        val performanceConsent =
+            GDPRConsent
+                .builder(true)
+                .document("parental_consent_agreement_v2")
+                .location("17 Cherry Tree Lan 3")
+                .hardwareId("IDFA:a5d934n0-232f-4afc-2e9a-3832d95zc702")
+                .build()
+        val state =
+            ConsentState
+                .builder()
+                .addGDPRConsentState("Marketing", marketingConsent)
+                .addGDPRConsentState("Performance", performanceConsent)
+                .build()
         filteredMParticleUser = FilteredMParticleUser.getInstance(user, kit)
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
@@ -597,12 +652,14 @@ class AppsflyerKitTests {
         val map =
             mapOf(
                 "GDPR" to true,
-                "marketing" to mapOf(
-                    "consented" to false,
-                    "document" to mapOf(
-                        "timestamp" to 1711038269644,
+                "marketing" to
+                    mapOf(
+                        "consented" to false,
+                        "document" to
+                            mapOf(
+                                "timestamp" to 1711038269644,
+                            ),
                     ),
-                ),
             )
         val method: Method =
             AppsFlyerKit::class.java.getDeclaredMethod(
@@ -668,47 +725,68 @@ class AppsflyerKitTests {
         Assert.assertEquals(emptyMap<String, String>(), result)
     }
 
-    private var emptyCoreCallbacks: CoreCallbacks = object : CoreCallbacks {
-        var activity = Activity()
-        override fun isBackgrounded(): Boolean = false
+    private var emptyCoreCallbacks: CoreCallbacks =
+        object : CoreCallbacks {
+            var activity = Activity()
 
-        override fun getUserBucket(): Int = 0
+            override fun isBackgrounded(): Boolean = false
 
-        override fun isEnabled(): Boolean = false
+            override fun getUserBucket(): Int = 0
 
-        override fun setIntegrationAttributes(i: Int, map: Map<String, String>) {}
+            override fun isEnabled(): Boolean = false
 
-        override fun getIntegrationAttributes(i: Int): Map<String, String>? = null
+            override fun setIntegrationAttributes(
+                i: Int,
+                map: Map<String, String>,
+            ) {}
 
-        override fun getCurrentActivity(): WeakReference<Activity> = WeakReference(activity)
+            override fun getIntegrationAttributes(i: Int): Map<String, String>? = null
 
-        override fun getLatestKitConfiguration(): JSONArray? = null
+            override fun getCurrentActivity(): WeakReference<Activity> = WeakReference(activity)
 
-        override fun getDataplanOptions(): MParticleOptions.DataplanOptions? = null
+            override fun getLatestKitConfiguration(): JSONArray? = null
 
-        override fun isPushEnabled(): Boolean = false
+            override fun getDataplanOptions(): MParticleOptions.DataplanOptions? = null
 
-        override fun getPushSenderId(): String? = null
+            override fun isPushEnabled(): Boolean = false
 
-        override fun getPushInstanceId(): String? = null
+            override fun getPushSenderId(): String? = null
 
-        override fun getLaunchUri(): Uri? = null
+            override fun getPushInstanceId(): String? = null
 
-        override fun getLaunchAction(): String? = null
+            override fun getLaunchUri(): Uri? = null
 
-        override fun getKitListener(): KitListener = object : KitListener {
-            override fun kitFound(kitId: Int) {}
-            override fun kitConfigReceived(kitId: Int, configuration: String?) {}
-            override fun kitExcluded(kitId: Int, reason: String?) {}
-            override fun kitStarted(kitId: Int) {}
-            override fun onKitApiCalled(kitId: Int, used: Boolean?, vararg objects: Any?) {}
-            override fun onKitApiCalled(
-                methodName: String?,
-                kitId: Int,
-                used: Boolean?,
-                vararg objects: Any?,
-            ) {
-            }
+            override fun getLaunchAction(): String? = null
+
+            override fun getKitListener(): KitListener =
+                object : KitListener {
+                    override fun kitFound(kitId: Int) {}
+
+                    override fun kitConfigReceived(
+                        kitId: Int,
+                        configuration: String?,
+                    ) {}
+
+                    override fun kitExcluded(
+                        kitId: Int,
+                        reason: String?,
+                    ) {}
+
+                    override fun kitStarted(kitId: Int) {}
+
+                    override fun onKitApiCalled(
+                        kitId: Int,
+                        used: Boolean?,
+                        vararg objects: Any?,
+                    ) {}
+
+                    override fun onKitApiCalled(
+                        methodName: String?,
+                        kitId: Int,
+                        used: Boolean?,
+                        vararg objects: Any?,
+                    ) {
+                    }
+                }
         }
-    }
 }

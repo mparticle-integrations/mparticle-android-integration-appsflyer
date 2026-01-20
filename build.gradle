@@ -61,6 +61,10 @@ android {
     }
 }
 
+ktlint {
+    android.set(true)
+}
+
 dependencies {
     api 'com.appsflyer:af-android-sdk:6.17.3'
     testImplementation files('libs/java-json.jar')
