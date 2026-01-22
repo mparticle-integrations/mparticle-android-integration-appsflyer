@@ -9,9 +9,7 @@ class AppsFlyerLib {
         consentData = consent
     }
 
-    fun getConsentData(): AppsFlyerConsent? {
-        return consentData
-    }
+    fun getConsentData(): AppsFlyerConsent? = consentData
 
     fun getConsentState(): MutableMap<Any, Any> {
         val stateMap = mutableMapOf<Any, Any>()
@@ -37,9 +35,7 @@ class AppsFlyerLib {
         }
 
         @JvmStatic
-        fun getInstance(context: Context?): AppsFlyerLib? {
-            return getInstance()
-        }
+        fun getInstance(context: Context?): AppsFlyerLib? = getInstance()
 
         /**
          * Access Methods
