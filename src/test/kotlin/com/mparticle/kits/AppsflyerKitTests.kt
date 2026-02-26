@@ -76,6 +76,57 @@ class AppsflyerKitTests {
         Assert.assertTrue(name.isNotEmpty())
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun testParseSharingFilterForPartners_returnsListForValidJson() {
+        val method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseSharingFilterForPartners",
+                String::class.java,
+            )
+        method.isAccessible = true
+        val result = method.invoke(kit, """["partner_1", "partner_2"]""")
+        Assert.assertEquals(listOf("partner_1", "partner_2"), result)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testParseSharingFilterForPartners_returnsNullForEmptyInput() {
+        val method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseSharingFilterForPartners",
+                String::class.java,
+            )
+        method.isAccessible = true
+        Assert.assertNull(method.invoke(kit, ""))
+        Assert.assertNull(method.invoke(kit, null))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testParseSharingFilterForPartners_returnsNullForInvalidJson() {
+        val method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseSharingFilterForPartners",
+                String::class.java,
+            )
+        method.isAccessible = true
+        Assert.assertNull(method.invoke(kit, "not a json array"))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testParseSharingFilterForPartners_stripsBackslashes() {
+        val method =
+            AppsFlyerKit::class.java.getDeclaredMethod(
+                "parseSharingFilterForPartners",
+                String::class.java,
+            )
+        method.isAccessible = true
+        val result = method.invoke(kit, """[\"test_1\", \"test_2\"]""")
+        Assert.assertEquals(listOf("test_1", "test_2"), result)
+    }
+
     /**
      * Kit *should* throw an exception when they're initialized with the wrong settings.
      *
