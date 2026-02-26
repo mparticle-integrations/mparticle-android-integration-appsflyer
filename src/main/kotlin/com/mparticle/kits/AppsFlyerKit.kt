@@ -62,7 +62,9 @@ class AppsFlyerKit :
                 MParticle.getInstance()?.environment == MParticle.Environment.Development,
             )
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
-        applySharingFilterForPartners(setting?.get(SHARING_FILTER_FOR_PARTNERS))
+        setting?.get(SHARING_FILTER_FOR_PARTNERS)?.let {
+            applySharingFilterForPartners(it)
+        }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
         AppsFlyerLib.getInstance().start(context.applicationContext)
@@ -580,7 +582,7 @@ class AppsFlyerKit :
         settings[SHARING_FILTER_FOR_PARTNERS]?.let { applySharingFilterForPartners(it) }
     }
 
-    private fun applySharingFilterForPartners(jsonValue: String?) {
+    private fun applySharingFilterForPartners(jsonValue: String) {
         val partners = parseSharingFilterForPartners(jsonValue)
         if (!partners.isNullOrEmpty()) {
             instance.setSharingFilterForPartners(*partners.toTypedArray())
@@ -592,7 +594,7 @@ class AppsFlyerKit :
         return try {
             val jsonWithFormat = json.replace("\\", "")
             val array = JSONArray(jsonWithFormat)
-            (0 until array.length()).map { array.getString(it) }
+            List(array.length()) { i -> array.getString(i) }
         } catch (e: JSONException) {
             Logger.warning(
                 "AppsFlyer kit: failed to parse sharingFilterForPartners, " +
