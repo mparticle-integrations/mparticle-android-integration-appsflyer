@@ -29,6 +29,7 @@ import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import org.json.JSONArray
@@ -47,7 +48,8 @@ class AppsFlyerKit :
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,
-    KitIntegration.UserAttributeListener {
+    KitIntegration.UserAttributeListener,
+    KitIntegration.IdentityListener {
     override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance()
 
     override fun getName() = NAME
@@ -62,12 +64,12 @@ class AppsFlyerKit :
                 MParticle.getInstance()?.environment == MParticle.Environment.Development,
             )
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
-        setting?.get(SHARING_FILTER_FOR_PARTNERS)?.let {
-            applySharingFilterForPartners(it)
-        }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
-        AppsFlyerLib.getInstance().start(context.applicationContext)
+        updateCustomerUserIdFromMpid(currentUser?.id)
+        if (!isManualStart()) {
+            AppsFlyerLib.getInstance().start(context.applicationContext)
+        }
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdEnabled())
         val integrationAttributes = HashMap<String, String?>(1)
         integrationAttributes[APPSFLYERID_INTEGRATION_KEY] =
@@ -307,7 +309,9 @@ class AppsFlyerKit :
 
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {
-            if (MParticle.IdentityType.CustomerId == identityType) {
+            if (isUserIdentificationMpid()) {
+                updateCustomerUserIdFromMpid(currentUser?.id)
+            } else if (MParticle.IdentityType.CustomerId == identityType) {
                 setCustomerUserId("")
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, "")
@@ -320,7 +324,9 @@ class AppsFlyerKit :
         identity: String,
     ) {
         with(instance) {
-            if (MParticle.IdentityType.CustomerId == identityType) {
+            if (isUserIdentificationMpid()) {
+                updateCustomerUserIdFromMpid(currentUser?.id)
+            } else if (MParticle.IdentityType.CustomerId == identityType) {
                 setCustomerUserId(identity)
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, identity)
@@ -329,6 +335,38 @@ class AppsFlyerKit :
     }
 
     override fun logout(): List<ReportingMessage> = emptyList()
+
+    override fun onIdentifyCompleted(
+        mParticleUser: MParticleUser,
+        filteredIdentityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIdFromMpid(mParticleUser.id)
+    }
+
+    override fun onLoginCompleted(
+        mParticleUser: MParticleUser,
+        filteredIdentityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIdFromMpid(mParticleUser.id)
+    }
+
+    override fun onLogoutCompleted(
+        mParticleUser: MParticleUser,
+        filteredIdentityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIdFromMpid(mParticleUser.id)
+    }
+
+    override fun onModifyCompleted(
+        mParticleUser: MParticleUser,
+        filteredIdentityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIdFromMpid(mParticleUser.id)
+    }
+
+    override fun onUserIdentified(mParticleUser: MParticleUser) {
+        updateCustomerUserIdFromMpid(mParticleUser.id)
+    }
 
     private fun parseToNestedMap(jsonString: String): Map<String, Any> {
         val topLevelMap = mutableMapOf<String, Any>()
@@ -559,7 +597,9 @@ class AppsFlyerKit :
         activity: Activity,
         bundle: Bundle?,
     ): List<ReportingMessage> {
-        instance.start(activity)
+        if (!isManualStart()) {
+            instance.start(activity)
+        }
         return emptyList()
     }
 
@@ -578,30 +618,13 @@ class AppsFlyerKit :
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
 
-    override fun onSettingsUpdated(settings: Map<String, String>) {
-        settings[SHARING_FILTER_FOR_PARTNERS]?.let { applySharingFilterForPartners(it) }
-    }
+    private fun isManualStart(): Boolean = settings[MANUAL_START]?.lowercase() == "true"
 
-    private fun applySharingFilterForPartners(jsonValue: String) {
-        val partners = parseSharingFilterForPartners(jsonValue)
-        if (!partners.isNullOrEmpty()) {
-            instance.setSharingFilterForPartners(*partners.toTypedArray())
-        }
-    }
+    private fun isUserIdentificationMpid(): Boolean = settings[USER_IDENTIFICATION_TYPE] == USER_IDENTIFICATION_MPID
 
-    private fun parseSharingFilterForPartners(json: String?): List<String>? {
-        if (json.isNullOrEmpty()) return null
-        return try {
-            val jsonWithFormat = json.replace("\\", "")
-            val array = JSONArray(jsonWithFormat)
-            List(array.length()) { i -> array.getString(i) }
-        } catch (e: JSONException) {
-            Logger.warning(
-                "AppsFlyer kit: failed to parse sharingFilterForPartners, " +
-                    "consent filter for partners will not be applied. Error: ${e.message}",
-            )
-            null
-        }
+    private fun updateCustomerUserIdFromMpid(mpid: Long?) {
+        if (!isUserIdentificationMpid() || mpid == null) return
+        instance.setCustomerUserId(mpid.toString())
     }
 
     companion object {
@@ -630,7 +653,9 @@ class AppsFlyerKit :
                 }
             }
 
-        private const val SHARING_FILTER_FOR_PARTNERS = "sharingFilterForPartners"
+        const val MANUAL_START = "manualStart"
+        const val USER_IDENTIFICATION_TYPE = "userIdentificationType"
+        const val USER_IDENTIFICATION_MPID = "MPID"
         private const val CONSENT_MAPPING = "consentMapping"
 
         @Suppress("ktlint:standard:property-naming")
