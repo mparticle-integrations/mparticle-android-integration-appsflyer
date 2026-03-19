@@ -29,7 +29,6 @@ import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
-import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import org.json.JSONArray
@@ -48,8 +47,7 @@ class AppsFlyerKit :
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,
-    KitIntegration.UserAttributeListener,
-    KitIntegration.IdentityListener {
+    KitIntegration.UserAttributeListener {
     override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance()
 
     override fun getName() = NAME
@@ -66,7 +64,6 @@ class AppsFlyerKit :
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
-        updateCustomerUserIdFromMpid(currentUser?.id)
         if (!isManualStart()) {
             AppsFlyerLib.getInstance().start(context.applicationContext)
         }
@@ -309,9 +306,7 @@ class AppsFlyerKit :
 
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {
-            if (isUserIdentificationMpid()) {
-                updateCustomerUserIdFromMpid(currentUser?.id)
-            } else if (MParticle.IdentityType.CustomerId == identityType) {
+            if (MParticle.IdentityType.CustomerId == identityType) {
                 setCustomerUserId("")
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, "")
@@ -324,9 +319,7 @@ class AppsFlyerKit :
         identity: String,
     ) {
         with(instance) {
-            if (isUserIdentificationMpid()) {
-                updateCustomerUserIdFromMpid(currentUser?.id)
-            } else if (MParticle.IdentityType.CustomerId == identityType) {
+            if (MParticle.IdentityType.CustomerId == identityType) {
                 setCustomerUserId(identity)
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, identity)
@@ -335,38 +328,6 @@ class AppsFlyerKit :
     }
 
     override fun logout(): List<ReportingMessage> = emptyList()
-
-    override fun onIdentifyCompleted(
-        mParticleUser: MParticleUser,
-        filteredIdentityApiRequest: FilteredIdentityApiRequest,
-    ) {
-        updateCustomerUserIdFromMpid(mParticleUser.id)
-    }
-
-    override fun onLoginCompleted(
-        mParticleUser: MParticleUser,
-        filteredIdentityApiRequest: FilteredIdentityApiRequest,
-    ) {
-        updateCustomerUserIdFromMpid(mParticleUser.id)
-    }
-
-    override fun onLogoutCompleted(
-        mParticleUser: MParticleUser,
-        filteredIdentityApiRequest: FilteredIdentityApiRequest,
-    ) {
-        updateCustomerUserIdFromMpid(mParticleUser.id)
-    }
-
-    override fun onModifyCompleted(
-        mParticleUser: MParticleUser,
-        filteredIdentityApiRequest: FilteredIdentityApiRequest,
-    ) {
-        updateCustomerUserIdFromMpid(mParticleUser.id)
-    }
-
-    override fun onUserIdentified(mParticleUser: MParticleUser) {
-        updateCustomerUserIdFromMpid(mParticleUser.id)
-    }
 
     private fun parseToNestedMap(jsonString: String): Map<String, Any> {
         val topLevelMap = mutableMapOf<String, Any>()
@@ -620,13 +581,6 @@ class AppsFlyerKit :
 
     private fun isManualStart(): Boolean = settings[MANUAL_START]?.lowercase() == "true"
 
-    private fun isUserIdentificationMpid(): Boolean = settings[USER_IDENTIFICATION_TYPE] == USER_IDENTIFICATION_MPID
-
-    private fun updateCustomerUserIdFromMpid(mpid: Long?) {
-        if (!isUserIdentificationMpid() || mpid == null) return
-        instance.setCustomerUserId(mpid.toString())
-    }
-
     companion object {
         const val DEV_KEY = "devKey"
         const val APPSFLYERID_INTEGRATION_KEY = "appsflyer_id_integration_setting"
@@ -654,8 +608,6 @@ class AppsFlyerKit :
             }
 
         const val MANUAL_START = "manualStart"
-        const val USER_IDENTIFICATION_TYPE = "userIdentificationType"
-        const val USER_IDENTIFICATION_MPID = "MPID"
         private const val CONSENT_MAPPING = "consentMapping"
 
         @Suppress("ktlint:standard:property-naming")

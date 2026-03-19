@@ -725,7 +725,7 @@ class AppsflyerKitTests {
         Assert.assertEquals(emptyMap<String, String>(), result)
     }
 
-    // region manualStart and userIdentificationType (MPID) tests
+    // region manualStart tests
 
     @Test
     @Throws(Exception::class)
@@ -756,40 +756,6 @@ class AppsflyerKitTests {
 
     @Test
     @Throws(Exception::class)
-    fun testIsUserIdentificationMpid_returnsTrueWhenSettingIsMPID() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val method =
-            AppsFlyerKit::class.java.getDeclaredMethod("isUserIdentificationMpid")
-        method.isAccessible = true
-        Assert.assertTrue(method.invoke(kit) as Boolean)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIsUserIdentificationMpid_returnsFalseWhenSettingIsAbsent() {
-        setKitSettings(emptyMap())
-        val method =
-            AppsFlyerKit::class.java.getDeclaredMethod("isUserIdentificationMpid")
-        method.isAccessible = true
-        Assert.assertFalse(method.invoke(kit) as Boolean)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIsUserIdentificationMpid_returnsFalseWhenSettingIsOther() {
-        setKitSettings(mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to "CustomerId"))
-        val method =
-            AppsFlyerKit::class.java.getDeclaredMethod("isUserIdentificationMpid")
-        method.isAccessible = true
-        Assert.assertFalse(method.invoke(kit) as Boolean)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun testOnActivityCreated_withManualStartTrue_doesNotCallStart() {
         setKitSettings(
             mapOf(
@@ -814,121 +780,12 @@ class AppsflyerKitTests {
 
     @Test
     @Throws(Exception::class)
-    fun testSetUserIdentity_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        // When userIdentificationType is MPID, identity callbacks set customer ID from user's MPID
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 12345L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onIdentifyCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertEquals("12345", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testSetUserIdentity_withoutUserIdentificationMpid_setsCustomerUserIdToIdentity() {
+    fun testSetUserIdentity_setsCustomerUserIdToIdentity() {
         setKitSettings(emptyMap())
 
         kit.setUserIdentity(MParticle.IdentityType.CustomerId, "custom-client-id")
 
         Assert.assertEquals("custom-client-id", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnIdentifyCompleted_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onIdentifyCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertEquals("54321", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnLoginCompleted_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onLoginCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertEquals("54321", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnLogoutCompleted_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onLogoutCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertEquals("54321", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnModifyCompleted_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onModifyCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertEquals("54321", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnUserIdentified_withUserIdentificationMpid_setsCustomerUserIdToMpid() {
-        setKitSettings(
-            mapOf(
-                AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID,
-            ),
-        )
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onUserIdentified(user)
-
-        Assert.assertEquals("54321", appsflyer.customerUserId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testOnIdentifyCompleted_withoutUserIdentificationMpid_doesNotSetCustomerUserIdFromMpid() {
-        setKitSettings(emptyMap())
-        val mpid = 54321L
-        Mockito.`when`(user.getId()).thenReturn(mpid)
-
-        kit.onIdentifyCompleted(user, mock(FilteredIdentityApiRequest::class.java))
-
-        Assert.assertNull(appsflyer.customerUserId)
     }
 
     @Throws(Exception::class)
@@ -937,29 +794,6 @@ class AppsflyerKitTests {
         configJson.put("id", "-1")
         configJson.put("as", settings.toMutableMap())
         kit.configuration = KitConfiguration.createKitConfiguration(configJson)
-    }
-
-    @Throws(Exception::class)
-    private fun setKitCurrentUser(user: FilteredMParticleUser?) {
-        var clazz: Class<*>? = kit.javaClass
-        while (clazz != null) {
-            for (field in clazz.declaredFields) {
-                val canSet =
-                    field.type.isAssignableFrom(FilteredMParticleUser::class.java) ||
-                        (field.name.lowercase().contains("user") && !field.type.isPrimitive)
-                if (canSet) {
-                    try {
-                        field.isAccessible = true
-                        field.set(kit, user)
-                        return
-                    } catch (_: Exception) {
-                        // try next field
-                    }
-                }
-            }
-            clazz = clazz.superclass
-        }
-        // No suitable field found - skip setting (e.g. base class structure differs)
     }
 
     // endregion
