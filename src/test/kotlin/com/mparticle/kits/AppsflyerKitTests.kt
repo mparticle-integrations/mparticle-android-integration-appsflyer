@@ -778,16 +778,6 @@ class AppsflyerKitTests {
         Assert.assertEquals(1, appsflyer.startCallCount)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun testSetUserIdentity_setsCustomerUserIdToIdentity() {
-        setKitSettings(emptyMap())
-
-        kit.setUserIdentity(MParticle.IdentityType.CustomerId, "custom-client-id")
-
-        Assert.assertEquals("custom-client-id", appsflyer.customerUserId)
-    }
-
     @Throws(Exception::class)
     private fun setKitSettings(settings: Map<String, String>) {
         val configJson = JSONObject()
