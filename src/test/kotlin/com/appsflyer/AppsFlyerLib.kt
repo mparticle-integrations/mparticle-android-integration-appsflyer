@@ -5,11 +5,39 @@ import android.content.Context
 class AppsFlyerLib {
     private var consentData: AppsFlyerConsent? = null
 
+    var startCallCount = 0
+        private set
+
+    var customerUserId: String? = null
+        private set
+
     fun setConsentData(consent: AppsFlyerConsent) {
         consentData = consent
     }
 
     fun getConsentData(): AppsFlyerConsent? = consentData
+
+    fun start(context: Context) {
+        startCallCount++
+    }
+
+    fun setCustomerUserId(id: String?) {
+        customerUserId = id
+    }
+
+    fun init(
+        devKey: String,
+        conversionListener: Any?,
+        context: Context,
+    ) {}
+
+    fun setCollectAndroidID(collect: Boolean) {}
+
+    fun getAppsFlyerUID(context: Context): String = "test-appsflyer-uid"
+
+    fun subscribeForDeepLink(listener: Any?) {}
+
+    fun setDebugLog(debug: Boolean) {}
 
     fun getConsentState(): MutableMap<Any, Any> {
         val stateMap = mutableMapOf<Any, Any>()

@@ -62,12 +62,11 @@ class AppsFlyerKit :
                 MParticle.getInstance()?.environment == MParticle.Environment.Development,
             )
         settings[DEV_KEY]?.let { AppsFlyerLib.getInstance().init(it, this, context) }
-        setting?.get(SHARING_FILTER_FOR_PARTNERS)?.let {
-            applySharingFilterForPartners(it)
-        }
         val userConsentState = currentUser?.consentState
         setConsent(userConsentState)
-        AppsFlyerLib.getInstance().start(context.applicationContext)
+        if (!isManualStart()) {
+            AppsFlyerLib.getInstance().start(context.applicationContext)
+        }
         AppsFlyerLib.getInstance().setCollectAndroidID(MParticle.isAndroidIdEnabled())
         val integrationAttributes = HashMap<String, String?>(1)
         integrationAttributes[APPSFLYERID_INTEGRATION_KEY] =
@@ -559,7 +558,9 @@ class AppsFlyerKit :
         activity: Activity,
         bundle: Bundle?,
     ): List<ReportingMessage> {
-        instance.start(activity)
+        if (!isManualStart()) {
+            instance.start(activity)
+        }
         return emptyList()
     }
 
@@ -578,31 +579,7 @@ class AppsFlyerKit :
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
 
-    override fun onSettingsUpdated(settings: Map<String, String>) {
-        settings[SHARING_FILTER_FOR_PARTNERS]?.let { applySharingFilterForPartners(it) }
-    }
-
-    private fun applySharingFilterForPartners(jsonValue: String) {
-        val partners = parseSharingFilterForPartners(jsonValue)
-        if (!partners.isNullOrEmpty()) {
-            instance.setSharingFilterForPartners(*partners.toTypedArray())
-        }
-    }
-
-    private fun parseSharingFilterForPartners(json: String?): List<String>? {
-        if (json.isNullOrEmpty()) return null
-        return try {
-            val jsonWithFormat = json.replace("\\", "")
-            val array = JSONArray(jsonWithFormat)
-            List(array.length()) { i -> array.getString(i) }
-        } catch (e: JSONException) {
-            Logger.warning(
-                "AppsFlyer kit: failed to parse sharingFilterForPartners, " +
-                    "consent filter for partners will not be applied. Error: ${e.message}",
-            )
-            null
-        }
-    }
+    private fun isManualStart(): Boolean = settings[MANUAL_START]?.lowercase() == "true"
 
     companion object {
         const val DEV_KEY = "devKey"
@@ -630,7 +607,7 @@ class AppsFlyerKit :
                 }
             }
 
-        private const val SHARING_FILTER_FOR_PARTNERS = "sharingFilterForPartners"
+        const val MANUAL_START = "manualStart"
         private const val CONSENT_MAPPING = "consentMapping"
 
         @Suppress("ktlint:standard:property-naming")
