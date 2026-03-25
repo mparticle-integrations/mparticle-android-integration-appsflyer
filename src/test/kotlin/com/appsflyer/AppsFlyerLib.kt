@@ -1,6 +1,8 @@
 package com.appsflyer
 
 import android.content.Context
+import com.appsflyer.AppsFlyerProperties
+import java.util.HashMap
 
 class AppsFlyerLib {
     private var consentData: AppsFlyerConsent? = null
@@ -9,6 +11,18 @@ class AppsFlyerLib {
         private set
 
     var customerUserId: String? = null
+        private set
+
+    var setCustomerUserIdCallCount = 0
+        private set
+
+    var lastSetCustomerUserId: String? = null
+        private set
+
+    var lastLogEventName: String? = null
+        private set
+
+    var lastLogEventValues: Map<String, Any?>? = null
         private set
 
     fun setConsentData(consent: AppsFlyerConsent) {
@@ -22,8 +36,26 @@ class AppsFlyerLib {
     }
 
     fun setCustomerUserId(id: String?) {
+        setCustomerUserIdCallCount++
+        lastSetCustomerUserId = id
         customerUserId = id
     }
+
+    fun setUserEmails(
+        cryptType: AppsFlyerProperties.EmailsCryptType,
+        vararg emails: String,
+    ) {}
+
+    fun logEvent(
+        context: Context,
+        name: String,
+        values: Map<String, Any?>?,
+    ) {
+        lastLogEventName = name
+        lastLogEventValues = values?.let { HashMap<String, Any?>(it) }
+    }
+
+    fun anonymizeUser(optOut: Boolean) {}
 
     fun init(
         devKey: String,
