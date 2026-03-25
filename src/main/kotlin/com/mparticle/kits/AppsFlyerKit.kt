@@ -29,6 +29,7 @@ import com.mparticle.MParticle
 import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
+import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.Logger
 import com.mparticle.internal.MPUtility
 import org.json.JSONArray
@@ -47,7 +48,8 @@ class AppsFlyerKit :
     KitIntegration.CommerceListener,
     AppsFlyerConversionListener,
     KitIntegration.ActivityListener,
-    KitIntegration.UserAttributeListener {
+    KitIntegration.UserAttributeListener,
+    KitIntegration.IdentityListener {
     override fun getInstance(): AppsFlyerLib = AppsFlyerLib.getInstance()
 
     override fun getName() = NAME
@@ -73,6 +75,8 @@ class AppsFlyerKit :
             AppsFlyerLib.getInstance().getAppsFlyerUID(context)
         setIntegrationAttributes(integrationAttributes)
         AppsFlyerLib.getInstance().subscribeForDeepLink(deepLinkListener())
+
+        updateCustomerUserIDIfNeededForUser(currentUser)
 
         val messages: MutableList<ReportingMessage> = ArrayList()
         messages.add(
@@ -107,6 +111,7 @@ class AppsFlyerKit :
     ): List<ReportingMessage> = emptyList()
 
     override fun logEvent(event: CommerceEvent): List<ReportingMessage> {
+        val event = commerceEventWithAppsFlyerCustomerUserId(event)
         val messages: MutableList<ReportingMessage> = LinkedList()
         val eventValues: MutableMap<String, Any?> = HashMap()
         val productList = event.products
@@ -215,9 +220,13 @@ class AppsFlyerKit :
             event.productAction == Product.PURCHASE
 
     override fun logEvent(event: MPEvent): List<ReportingMessage> {
-        var hashMap: HashMap<String?, Any?>? = hashMapOf()
-        if (event.customAttributes?.isNotEmpty() == true) {
-            hashMap = event.customAttributes?.let { HashMap(it) }
+        val hashMap: HashMap<String?, Any?> =
+            event.customAttributes
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { HashMap(it) }
+                ?: hashMapOf()
+        customerIdForAppsFlyer(currentUser)?.takeIf { it.isNotEmpty() }?.let { cid ->
+            hashMap[AF_CUSTOMER_USER_ID] = cid
         }
         instance.logEvent(context, event.eventName, hashMap)
         val messages: MutableList<ReportingMessage> = LinkedList()
@@ -307,7 +316,11 @@ class AppsFlyerKit :
     override fun removeUserIdentity(identityType: MParticle.IdentityType) {
         with(instance) {
             if (MParticle.IdentityType.CustomerId == identityType) {
-                setCustomerUserId("")
+                if (isUserIdentificationMPID() || isUserIdentificationCustomerId()) {
+                    updateCustomerUserIDIfNeededForUser(currentUser)
+                } else {
+                    setCustomerUserId("")
+                }
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, "")
             }
@@ -320,7 +333,9 @@ class AppsFlyerKit :
     ) {
         with(instance) {
             if (MParticle.IdentityType.CustomerId == identityType) {
-                setCustomerUserId(identity)
+                if (!isUserIdentificationMPID()) {
+                    setCustomerUserId(identity)
+                }
             } else if (MParticle.IdentityType.Email == identityType) {
                 setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, identity)
             }
@@ -328,6 +343,71 @@ class AppsFlyerKit :
     }
 
     override fun logout(): List<ReportingMessage> = emptyList()
+
+    override fun onIdentifyCompleted(
+        mParticleUser: MParticleUser,
+        identityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIDIfNeededForUser(mParticleUser)
+    }
+
+    override fun onLoginCompleted(
+        mParticleUser: MParticleUser,
+        identityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIDIfNeededForUser(mParticleUser)
+    }
+
+    override fun onLogoutCompleted(
+        mParticleUser: MParticleUser,
+        identityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIDIfNeededForUser(mParticleUser)
+    }
+
+    override fun onModifyCompleted(
+        mParticleUser: MParticleUser,
+        identityApiRequest: FilteredIdentityApiRequest,
+    ) {
+        updateCustomerUserIDIfNeededForUser(mParticleUser)
+    }
+
+    override fun onUserIdentified(mParticleUser: MParticleUser) {
+        updateCustomerUserIDIfNeededForUser(mParticleUser)
+    }
+
+    private fun isUserIdentificationMPID(): Boolean = USER_IDENTIFICATION_MPID == settings[USER_IDENTIFICATION_TYPE]
+
+    private fun isUserIdentificationCustomerId(): Boolean = USER_IDENTIFICATION_CUSTOMER_ID == settings[USER_IDENTIFICATION_TYPE]
+
+    private fun customerIdForAppsFlyer(user: MParticleUser?): String? {
+        if (user == null) {
+            return null
+        }
+        return when {
+            isUserIdentificationMPID() -> user.id.toString()
+            isUserIdentificationCustomerId() ->
+                user.getUserIdentities()[MParticle.IdentityType.CustomerId]
+            else -> user.id.toString()
+        }
+    }
+
+    private fun updateCustomerUserIDIfNeededForUser(user: MParticleUser?) {
+        if (!isUserIdentificationMPID() && !isUserIdentificationCustomerId()) {
+            return
+        }
+        instance.setCustomerUserId(customerIdForAppsFlyer(user))
+    }
+
+    private fun commerceEventWithAppsFlyerCustomerUserId(event: CommerceEvent): CommerceEvent {
+        val cid = customerIdForAppsFlyer(currentUser)?.takeIf { it.isNotEmpty() } ?: return event
+        val newAttrs = HashMap<String, String>()
+        event.customAttributes?.forEach { (key, value) ->
+            newAttrs[key] = value?.toString() ?: ""
+        }
+        newAttrs[AF_CUSTOMER_USER_ID] = cid
+        return CommerceEvent.Builder(event).customAttributes(newAttrs).build()
+    }
 
     private fun parseToNestedMap(jsonString: String): Map<String, Any> {
         val topLevelMap = mutableMapOf<String, Any>()
@@ -608,6 +688,19 @@ class AppsFlyerKit :
             }
 
         const val MANUAL_START = "manualStart"
+
+        /**
+         * Kit setting: use [USER_IDENTIFICATION_MPID], [USER_IDENTIFICATION_CUSTOMER_ID], or omit for legacy (MPID).
+         * When set to [USER_IDENTIFICATION_MPID] or [USER_IDENTIFICATION_CUSTOMER_ID], AppsFlyer customer user ID
+         * is synced on identity changes and `setUserIdentity(CustomerId)` does not override MPID mode.
+         */
+        const val USER_IDENTIFICATION_TYPE = "userIdentificationType"
+
+        const val USER_IDENTIFICATION_MPID = "MPID"
+        const val USER_IDENTIFICATION_CUSTOMER_ID = "CustomerId"
+
+        const val AF_CUSTOMER_USER_ID = "af_customer_user_id"
+
         private const val CONSENT_MAPPING = "consentMapping"
 
         @Suppress("ktlint:standard:property-naming")

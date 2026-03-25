@@ -15,8 +15,6 @@ import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.MParticleUser
 import com.mparticle.internal.CoreCallbacks
 import com.mparticle.internal.CoreCallbacks.KitListener
-import junit.framework.Assert.assertEquals
-import junit.framework.TestCase
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -85,9 +83,8 @@ class AppsflyerKitTests {
     fun testOnKitCreate() {
         var e: Throwable? = null
         try {
-            val settings = HashMap<String, String>()
-            settings["fake setting"] = "fake"
-            kit.onKitCreate(settings as Map<String?, String?>, mock(Context::class.java))
+            val settings = hashMapOf<String?, String?>("fake setting" to "fake")
+            kit.onKitCreate(settings, mock(Context::class.java))
         } catch (ex: Throwable) {
             e = ex
         }
@@ -123,7 +120,7 @@ class AppsflyerKitTests {
                 .Builder(Product.PURCHASE, product)
                 .transactionAttributes(TransactionAttributes("foo"))
                 .build()
-        assertEquals(mutableListOf("foo-sku"), AppsFlyerKit.generateProductIdList(event))
+        Assert.assertEquals(mutableListOf("foo-sku"), AppsFlyerKit.generateProductIdList(event))
         val product2 = Product.Builder("foo-name-2", "foo-sku-2", 50.0).build()
         val event2 =
             CommerceEvent
@@ -131,7 +128,7 @@ class AppsflyerKitTests {
                 .addProduct(product2)
                 .transactionAttributes(TransactionAttributes("foo"))
                 .build()
-        assertEquals(
+        Assert.assertEquals(
             mutableListOf("foo-sku", "foo-sku-2"),
             AppsFlyerKit.generateProductIdList(event2),
         )
@@ -143,7 +140,7 @@ class AppsflyerKitTests {
                 .addProduct(product3)
                 .transactionAttributes(TransactionAttributes("foo"))
                 .build()
-        assertEquals(
+        Assert.assertEquals(
             mutableListOf("foo-sku", "foo-sku-2", "foo-sku-%2C3"),
             AppsFlyerKit.generateProductIdList(event3),
         )
@@ -183,19 +180,19 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(false, expectedConsentValue)
+        Assert.assertEquals(false, expectedConsentValue)
 
         val notExpectedConsentKey =
             afConsentResults.containsKey("hasConsentForDataUsage")
-        TestCase.assertEquals(false, notExpectedConsentKey)
+        Assert.assertEquals(false, notExpectedConsentKey)
 
         val notExpectedConsentKey2 =
             afConsentResults.containsKey("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(false, notExpectedConsentKey2)
+        Assert.assertEquals(false, notExpectedConsentKey2)
 
         val notExpectedConsentKey3 =
             afConsentResults.containsKey("hasConsentForAdStorage")
-        TestCase.assertEquals(false, notExpectedConsentKey3)
+        Assert.assertEquals(false, notExpectedConsentKey3)
     }
 
     @Test
@@ -232,19 +229,19 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val notExpectedConsentKey =
             afConsentResults.containsKey("hasConsentForDataUsage")
-        TestCase.assertEquals(false, notExpectedConsentKey)
+        Assert.assertEquals(false, notExpectedConsentKey)
 
         val notExpectedConsentKey2 =
             afConsentResults.containsKey("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(false, notExpectedConsentKey2)
+        Assert.assertEquals(false, notExpectedConsentKey2)
 
         val notExpectedConsentKey3 =
             afConsentResults.containsKey("hasConsentForAdStorage")
-        TestCase.assertEquals(false, notExpectedConsentKey3)
+        Assert.assertEquals(false, notExpectedConsentKey3)
     }
 
     @Test
@@ -281,22 +278,22 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
             afConsentResults
                 .getValue("hasConsentForDataUsage")
-        TestCase.assertEquals(false, expectedConsentValue2)
+        Assert.assertEquals(false, expectedConsentValue2)
 
         val expectedConsentValue3 =
             afConsentResults
                 .getValue("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(true, expectedConsentValue3)
+        Assert.assertEquals(true, expectedConsentValue3)
 
         val expectedConsentValue4 =
             afConsentResults
                 .getValue("hasConsentForAdStorage")
-        TestCase.assertEquals(true, expectedConsentValue4)
+        Assert.assertEquals(true, expectedConsentValue4)
     }
 
     @Test
@@ -349,22 +346,22 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
             afConsentResults
                 .getValue("hasConsentForDataUsage")
-        TestCase.assertEquals(true, expectedConsentValue2)
+        Assert.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
             afConsentResults
                 .getValue("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(false, expectedConsentValue3)
+        Assert.assertEquals(false, expectedConsentValue3)
 
         val expectedConsentValue4 =
             afConsentResults
                 .getValue("hasConsentForAdStorage")
-        TestCase.assertEquals(false, expectedConsentValue4)
+        Assert.assertEquals(false, expectedConsentValue4)
     }
 
     @Test
@@ -410,22 +407,22 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
             afConsentResults
                 .getValue("hasConsentForDataUsage")
-        TestCase.assertEquals(true, expectedConsentValue2)
+        Assert.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
             afConsentResults
                 .getValue("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(true, expectedConsentValue3)
+        Assert.assertEquals(true, expectedConsentValue3)
 
         val expectedConsentValue4 =
             afConsentResults
                 .getValue("hasConsentForAdStorage")
-        TestCase.assertEquals(true, expectedConsentValue4)
+        Assert.assertEquals(true, expectedConsentValue4)
     }
 
     @Test
@@ -467,21 +464,21 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
             afConsentResults
                 .getValue("hasConsentForDataUsage")
-        TestCase.assertEquals(true, expectedConsentValue2)
+        Assert.assertEquals(true, expectedConsentValue2)
 
         val expectedConsentValue3 =
             afConsentResults
                 .getValue("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(true, expectedConsentValue3)
+        Assert.assertEquals(true, expectedConsentValue3)
 
         val notExpectedConsentKey =
             afConsentResults.containsKey("hasConsentForAdStorage")
-        TestCase.assertEquals(false, notExpectedConsentKey)
+        Assert.assertEquals(false, notExpectedConsentKey)
     }
 
     @Test
@@ -512,7 +509,7 @@ class AppsflyerKitTests {
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
 
-        TestCase.assertEquals(0, appsflyer.getConsentState().size)
+        Assert.assertEquals(0, appsflyer.getConsentState().size)
     }
 
     @Test
@@ -556,22 +553,22 @@ class AppsflyerKitTests {
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(true, expectedConsentValue)
+        Assert.assertEquals(true, expectedConsentValue)
 
         val expectedConsentValue2 =
             afConsentResults
                 .getValue("hasConsentForDataUsage")
-        TestCase.assertEquals(false, expectedConsentValue2)
+        Assert.assertEquals(false, expectedConsentValue2)
 
         val expectedConsentValue3 =
             afConsentResults
                 .getValue("hasConsentForAdsPersonalization")
-        TestCase.assertEquals(false, expectedConsentValue3)
+        Assert.assertEquals(false, expectedConsentValue3)
 
         val expectedConsentValue4 =
             afConsentResults
                 .getValue("hasConsentForAdStorage")
-        TestCase.assertEquals(true, expectedConsentValue4)
+        Assert.assertEquals(true, expectedConsentValue4)
     }
 
     @Test
@@ -610,12 +607,12 @@ class AppsflyerKitTests {
 
         kit.onConsentStateUpdated(state, state, filteredMParticleUser)
 
-        TestCase.assertEquals(1, appsflyer.getConsentState().size)
+        Assert.assertEquals(1, appsflyer.getConsentState().size)
         val afConsentResults = appsflyer.getConsentState()
         val expectedConsentValue =
             afConsentResults
                 .getValue("isUserSubjectToGDPR")
-        TestCase.assertEquals(false, expectedConsentValue)
+        Assert.assertEquals(false, expectedConsentValue)
     }
 
     @Test
@@ -724,6 +721,129 @@ class AppsflyerKitTests {
         val result = method.invoke(kit, null)
         Assert.assertEquals(emptyMap<String, String>(), result)
     }
+
+    // region userIdentificationType
+
+    @Test
+    fun testSetUserIdentity_customerId_legacy_forwardsToAppsFlyer() {
+        setKitSettings(emptyMap())
+        kit.setUserIdentity(MParticle.IdentityType.CustomerId, "ext-cust-1")
+        Assert.assertEquals(1, appsflyer.setCustomerUserIdCallCount)
+        Assert.assertEquals("ext-cust-1", appsflyer.lastSetCustomerUserId)
+    }
+
+    @Test
+    fun testSetUserIdentity_customerId_customerIdMode_forwardsToAppsFlyer() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_CUSTOMER_ID),
+        )
+        kit.setUserIdentity(MParticle.IdentityType.CustomerId, "ext-cust-2")
+        Assert.assertEquals(1, appsflyer.setCustomerUserIdCallCount)
+        Assert.assertEquals("ext-cust-2", appsflyer.lastSetCustomerUserId)
+    }
+
+    @Test
+    fun testSetUserIdentity_customerId_mpidMode_doesNotCallSetCustomerUserId() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID),
+        )
+        kit.setUserIdentity(MParticle.IdentityType.CustomerId, "ext-ignored")
+        Assert.assertEquals(0, appsflyer.setCustomerUserIdCallCount)
+        Assert.assertNull(appsflyer.lastSetCustomerUserId)
+    }
+
+    @Test
+    fun testSetUserIdentity_email_doesNotUseCustomerUserIdPath() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID),
+        )
+        kit.setUserIdentity(MParticle.IdentityType.Email, "a@b.com")
+        Assert.assertEquals(0, appsflyer.setCustomerUserIdCallCount)
+    }
+
+    @Test
+    fun testSetUserIdentity_unsupportedIdentity_doesNotSetCustomerUserId() {
+        setKitSettings(emptyMap())
+        kit.setUserIdentity(MParticle.IdentityType.Other, "x")
+        Assert.assertEquals(0, appsflyer.setCustomerUserIdCallCount)
+    }
+
+    @Test
+    fun testOnIdentifyCompleted_mpidMode_setsCustomerUserIdFromMpid() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID),
+        )
+        val mpUser = mock(MParticleUser::class.java)
+        Mockito.`when`(mpUser.getId()).thenReturn(42L)
+        kit.onIdentifyCompleted(mpUser, mock(FilteredIdentityApiRequest::class.java))
+        Assert.assertEquals(1, appsflyer.setCustomerUserIdCallCount)
+        Assert.assertEquals("42", appsflyer.lastSetCustomerUserId)
+    }
+
+    @Test
+    fun testOnIdentifyCompleted_legacy_doesNotSyncCustomerUserId() {
+        setKitSettings(emptyMap())
+        val mpUser = mock(MParticleUser::class.java)
+        kit.onIdentifyCompleted(mpUser, mock(FilteredIdentityApiRequest::class.java))
+        Assert.assertEquals(0, appsflyer.setCustomerUserIdCallCount)
+    }
+
+    @Test
+    fun testOnIdentifyCompleted_customerIdMode_usesExternalCustomerId() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_CUSTOMER_ID),
+        )
+        val mpUser = mock(MParticleUser::class.java)
+        Mockito.`when`(mpUser.getUserIdentities()).thenReturn(
+            mapOf(MParticle.IdentityType.CustomerId to "cust-ext"),
+        )
+        kit.onIdentifyCompleted(mpUser, mock(FilteredIdentityApiRequest::class.java))
+        Assert.assertEquals(1, appsflyer.setCustomerUserIdCallCount)
+        Assert.assertEquals("cust-ext", appsflyer.lastSetCustomerUserId)
+    }
+
+    @Test
+    fun testLogMPEvent_includesAfCustomerUserId() {
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_CUSTOMER_ID),
+        )
+        val mpUser = mock(MParticleUser::class.java)
+        Mockito.`when`(mpUser.getUserIdentities()).thenReturn(
+            mapOf(MParticle.IdentityType.CustomerId to "c-out"),
+        )
+        // Same inputs as onIdentifyCompleted (raw MParticleUser). FilteredMParticleUser.getUserIdentities
+        // can NPE in unit tests when dataplan transform returns null; kit UI settings match production.
+        val customerIdMethod =
+            AppsFlyerKit::class.java.declaredMethods.first {
+                it.name == "customerIdForAppsFlyer"
+            }
+        customerIdMethod.isAccessible = true
+        val cid = customerIdMethod.invoke(kit, mpUser) as String?
+        Assert.assertEquals("c-out", cid)
+    }
+
+    @Test
+    fun testCommerceEvent_includesAfCustomerUserId_mpidMode() {
+        val identityApi = mock(IdentityApi::class.java)
+        val mpUser = mock(MParticleUser::class.java)
+        Mockito.`when`(mpUser.getId()).thenReturn(555L)
+        Mockito.`when`(identityApi.getCurrentUser()).thenReturn(mpUser)
+        val mParticle = MParticle.getInstance()!!
+        Mockito.`when`(mParticle.Identity()).thenReturn(identityApi)
+        Mockito.`when`(mParticle.environment).thenReturn(MParticle.Environment.Production)
+        setKitSettings(
+            mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_MPID),
+        )
+        val product = Product.Builder("n", "sku1", 1.0).quantity(1.0).build()
+        val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).build()
+        kit.logEvent(event)
+        Assert.assertEquals(
+            "555",
+            appsflyer.lastLogEventValues?.get(AppsFlyerKit.AF_CUSTOMER_USER_ID),
+        )
+    }
+
+    // endregion
 
     // region manualStart tests
 
