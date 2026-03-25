@@ -803,7 +803,7 @@ class AppsflyerKitTests {
     }
 
     @Test
-    fun testLogMPEvent_includesAfCustomerUserId() {
+    fun customerIdForAppsFlyer_customerIdMode_returnsCustomerIdFromIdentities() {
         setKitSettings(
             mapOf(AppsFlyerKit.USER_IDENTIFICATION_TYPE to AppsFlyerKit.USER_IDENTIFICATION_CUSTOMER_ID),
         )
